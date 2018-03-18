@@ -69,7 +69,7 @@ class TwolineDisplay:
 	def update_value_time_trend(self,value,mins,trend):
 		valStr = "--"
 		trendChars = "  "
-		if (mins < 20):
+		if (value > 0):
 			valStr = str(value)
 			trendChars = self.__get_trend_chars(trend)
 	

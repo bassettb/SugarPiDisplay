@@ -169,6 +169,9 @@ class PiSugar():
 				lastReading = reading
 				nextRunTime = reading.timestamp + datetime.timedelta(seconds=(interval_seconds+10))
 			else:
+				if (readingAgeMins >= 20):
+					self.glucoseDisplay.update_value_time_trend(0, readingAgeMins, 0)
+					
 				if (readingAgeMins >= 10):
 					nextRunTime = now_plus_seconds(60)
 				elif (readingAgeMins >= 6):
