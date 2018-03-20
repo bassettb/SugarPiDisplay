@@ -28,3 +28,7 @@ def get_reading_age_minutes(timestamp):
 def now_plus_seconds(seconds):
 	return datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)
 
+class Reading():
+	timestamp = None
+	value = 0
+	trend = 0

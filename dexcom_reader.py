@@ -74,7 +74,7 @@ class DexcomReader():
 		reading = self.__parse_gv(result['content'])
 		if (reading is None):
 			return {"invalidResponse" : True}
-		return reading
+		return { 'reading' : reading }
 			#print (resp.status, resp.reason)
 			#print(str(resp.status) + " " + respBytes.decode("utf-8"))
 
@@ -117,10 +117,11 @@ class DexcomReader():
 			if(timestamp > datetime.datetime.utcnow()):
 				timestamp = datetime.datetime.utcnow()
 				self.__logger.warning("Corrected timestamp to now")
-			reading = {}
-			reading['timestamp'] = timestamp
-			reading['value'] = value
-			reading['trend'] = trend
+				
+			reading = Reading()
+			reading.timestamp = timestamp
+			reading.value = value
+			reading.trend = trend
 			return reading
 		except Exception as e:
 			self.__logger.error('Exception during parse ' + str(e))

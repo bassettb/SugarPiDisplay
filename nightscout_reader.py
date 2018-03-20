@@ -60,7 +60,7 @@ class NightscoutReader():
 		reading = self.__parse_gv(result['content'])
 		if (reading is None):
 			return {"invalidResponse" : True}
-		return reading
+		return { 'reading' : reading }
 			#print (resp.status, resp.reason)
 			#print(str(resp.status) + " " + respBytes.decode("utf-8"))
 
@@ -88,7 +88,7 @@ class NightscoutReader():
 			return result
 
 	def __parse_gv(self,data):
-		#try:
+		try:
 			self.__logger.info(data)
 			obj = json.loads(data)
 			obj = obj[0]
@@ -101,14 +101,15 @@ class NightscoutReader():
 			if(timestamp > datetime.datetime.utcnow()):
 				timestamp = datetime.datetime.utcnow()
 				self.__logger.warning("Corrected timestamp to now")
-			reading = {}
-			reading['timestamp'] = timestamp
-			reading['value'] = value
-			reading['trend'] = trend
+
+			reading = Reading()
+			reading.timestamp = timestamp
+			reading.value = value
+			reading.trend = trend
 			return reading
-		#except Exception as e:
-		#	self.__logger.error('Exception during parse ' + str(e))
-		#	return None
+		except Exception as e:
+			self.__logger.error('Exception during parse ' + str(e))
+			return None
 			
 	def __check_session_expire(self, result):
 		if (result['status'] == 401):

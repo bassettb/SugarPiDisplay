@@ -24,11 +24,6 @@ if (debug_mode):
 	from console_display import ConsoleDisplay
 else:
 	from twoline_display import TwolineDisplay
-	
-class Reading():
-	timestamp = None
-	value = 0
-	trend = 0
 
 ip_show_seconds = 6
 if (debug_mode):
@@ -79,10 +74,6 @@ class PiSugar():
 			return self.reader.set_config(self.config)
 		elif (self.config["data_source"] == "nightscout"):
 			self.logger.info('Loading nightscout reader')
-
-
-
-
 			self.reader = NightscoutReader(self.logger)
 			return self.reader.set_config(self.config)
 		else:
@@ -165,10 +156,7 @@ class PiSugar():
 				nextRunTime = now_plus_seconds(1)
 				continue
 
-			reading = Reading()
-			reading.timestamp = resp['timestamp']
-			reading.value = resp['value']
-			reading.trend = resp['trend']
+			reading = resp['reading']
 			
 			isNewReading = ((lastReading is None) or (lastReading.timestamp != reading.timestamp))
 			readingAgeMins = get_reading_age_minutes(reading.timestamp)
