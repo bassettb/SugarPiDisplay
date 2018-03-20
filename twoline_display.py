@@ -7,6 +7,8 @@ from RPLCD.i2c import CharLCD
 class TwolineDisplay:
 
 	__lcd = None
+	__animIdx = -1
+	__animChars = []
 
 	def __init__(self):
 
@@ -33,11 +35,8 @@ class TwolineDisplay:
 
 
 	def find_device(self,port):
-
 		bus = smbus.SMBus(port) # 1 indicates /dev/i2c-1
-
 		for device in range(128):
-
 			try:
 				bus.read_byte(device)
 				#print(hex(device))
@@ -45,10 +44,12 @@ class TwolineDisplay:
 			except: # exception if read_byte fails
 				pass
 		return -1
-	
+
+
 	def clear(self):
 		self.__lcd.clear()
-		
+
+
 	def show_centered(self,line,text):
 		print(text)
 		self.__lcd.cursor_pos = (line, 0)
@@ -78,7 +79,7 @@ class TwolineDisplay:
 		valStr = valStr.replace("0","O")
 		valStr = valStr.rjust(6)
 		self.__lcd.cursor_pos = (0, 0)
-		self.__lcd.write_string(valStr + "          ")   # this is lazy
+		self.__lcd.write_string(valStr)
 
 		self.__lcd.cursor_pos = (1, 4)
 		self.__lcd.write_string(trendChars)
@@ -96,28 +97,36 @@ class TwolineDisplay:
 		ageStr = ageStr.replace("0","O")
 		ageStr = ageStr.rjust(3)
 		
-		#pos = 16 - len(ageStr)
 		self.__lcd.cursor_pos = (1, 13)
 		self.__lcd.write_string(ageStr)
 		
 
+	def updateAnimation(self):
+		self.__animIdx += 1
+		if (self.__animIdx >= len(self.__animChars)):
+			self.__animIdx = 0
+		char = self.__animChars[self.__animIdx]
+		self.__lcd.cursor_pos = (0, 15)
+		self.__lcd.write_string(char)
+		
+		
 	def __get_trend_chars(self,trend):
 		if(trend == 0):
 			return "**"
 		if(trend == 1):
-			return "\x02\x02"
+			return "\x01\x01"
 		if(trend == 2):
-			return "\x02 "
+			return "\x01 "
 		if(trend == 3):
-			return "\x03 "
+			return "\x02 "
 		if(trend == 4):
 			return "-\x7e"
 		if(trend == 5):
-			return "\x05 "
+			return "\x03 "
 		if(trend == 6):
-			return "\x06 "
+			return "\x04 "
 		if(trend == 7):
-			return "\x06\x06"
+			return "\x04\x04"
 		if(trend == 8):
 			return "NC"
 		if(trend == 9):
@@ -137,7 +146,7 @@ class TwolineDisplay:
 			 0b00100,
 			 0b00100
 		)
-		self.__lcd.create_char(2, upArrow)
+		self.__lcd.create_char(1, upArrow)
 
 		upSlight = (
 			 0b00000,
@@ -149,7 +158,7 @@ class TwolineDisplay:
 			 0b10000,
 			 0b00000
 		)
-		self.__lcd.create_char(3, upSlight)
+		self.__lcd.create_char(2, upSlight)
 
 		dnSlight = (
 			 0b00000,
@@ -161,7 +170,7 @@ class TwolineDisplay:
 			 0b00111,
 			 0b00000
 		)
-		self.__lcd.create_char(5, dnSlight)
+		self.__lcd.create_char(3, dnSlight)
 
 		dnArrow = (
 			 0b00000,
@@ -173,5 +182,43 @@ class TwolineDisplay:
 			 0b01110,
 			 0b00100
 		)
-		self.__lcd.create_char(6, dnArrow)
+		self.__lcd.create_char(4, dnArrow)
 
+		
+		self.__animChars = [ '\x05', '\x06', '\x07' ]
+
+		anim1 = (
+			 0b00010,
+			 0b00001,
+			 0b00001,
+			 0b00001,
+			 0b00000,
+			 0b00000,
+			 0b00000,
+			 0b00000
+		)
+		self.__lcd.create_char(5, anim1)
+		
+		anim2 = (
+			 0b01100,
+			 0b10000,
+			 0b10000,
+			 0b00000,
+			 0b00000,
+			 0b00000,
+			 0b00000,
+			 0b00000
+		)
+		self.__lcd.create_char(6, anim2)
+		
+		anim3 = (
+			 0b00000,
+			 0b00000,
+			 0b00000,
+			 0b10000,
+			 0b01110,
+			 0b00000,
+			 0b00000,
+			 0b00000
+		)
+		self.__lcd.create_char(7, anim3)

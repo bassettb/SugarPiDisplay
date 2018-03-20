@@ -30,6 +30,9 @@ class Reading():
 	value = 0
 	trend = 0
 
+ip_show_seconds = 6
+if (debug_mode):
+	ip_show_seconds = 2
 
 
 LOG_FILENAME="pi-sugar.log"
@@ -87,18 +90,20 @@ class PiSugar():
 			return False
 
 	def read_config(self):
+		self.config.update(loadConfigDefaults())
 		try:
 			f = open(os.path.join(pi_sugar_path, config_file), "r")
-			self.config = json.load(f)
+			configFromFile = json.load(f)
 			f.close()
 		except:
 			self.logger.error("Error reading config file")
 			return False
-
-		if 'data_source' not in self.config.keys():
+		self.config.update(configFromFile)
+		if 'data_source' not in self.config:
 			self.logger.error('Invalid config values')
 			self.config.clear()
 			return False
+
 		return True
 
 
@@ -108,10 +113,7 @@ class PiSugar():
 		lastReading = None
 		validToken = False
 		
-		ip_show_seconds = 6
-		if (debug_mode):
-			ip_show_seconds = 2
-		self.show_ip(2)
+		self.show_ip(ip_show_seconds)
 		self.glucoseDisplay.show_centered(0, "Initializing")
 		
 		while True:
@@ -125,11 +127,14 @@ class PiSugar():
 
 		nextRunTime = now_plus_seconds(0)
 		while True:
-			time.sleep(4)
+			time.sleep(3)
 
 			if lastReading is not None:
 				readingAgeMins = get_reading_age_minutes(lastReading.timestamp)
 				self.glucoseDisplay.update_age(readingAgeMins)
+
+			if (self.config['animation']):
+				self.glucoseDisplay.updateAnimation()
 
 			if (nextRunTime > datetime.datetime.utcnow()):
 				continue
@@ -145,6 +150,9 @@ class PiSugar():
 						nextRunTime = now_plus_seconds(20)
 					continue
 			login_attempts = 0
+
+			self.glucoseDisplay.clear()
+			self.glucoseDisplay.update_value_time_trend(0, 0, 0)
 
 			resp = self.reader.get_latest_gv()
 			if 'invalidResponse' in resp.keys():
@@ -191,7 +199,9 @@ class PiSugar():
 			self.glucoseDisplay.show_centered(0,ip)
 			time.sleep(1)
 
-		
+def loadConfigDefaults():
+	configDefaults = { "animation": False }	
+	return configDefaults
 
 app = PiSugar()
 app.initialize()

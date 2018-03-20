@@ -14,7 +14,7 @@ class ConsoleDisplay:
 	def update_value_time_trend(self,value,mins,trend):
 		valStr = "--"
 		trendChars = "  "
-		if (mins < 20):
+		if (value > 0):
 			valStr = str(value)
 			#trendChars = self.__getTrendChars(trend)
 	
@@ -31,6 +31,9 @@ class ConsoleDisplay:
 			ageStr = str(mins) + "m"
 
 		ageStr = ageStr.rjust(3)
+
+	def updateAnimation(self):
+		pass
 
 	def __get_trend_word(self,trend):
 		if(trend == Trend.DoubleUp):
