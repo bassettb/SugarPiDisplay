@@ -13,31 +13,19 @@ import json
 from pathlib import Path
 
 from utils import *
+from config_utils import *
 from nightscout_reader import NightscoutReader
 from dexcom_reader import DexcomReader
 
-debug_mode = False
-if (len(sys.argv) > 1 and sys.argv[1] == "debug"):
-	debug_mode = True
-
-if (debug_mode):
-	from console_display import ConsoleDisplay
-else:
-	from twoline_display import TwolineDisplay
-
-ip_show_seconds = 6
-if (debug_mode):
-	ip_show_seconds = 2
-
-
-LOG_FILENAME="pi-sugar.log"
-folder_name = '.pi-sugar'
-config_file = 'config.json'
-pi_sugar_path = os.path.join(str(Path.home()), folder_name)
-Path(pi_sugar_path).mkdir(exist_ok=True) 
-interval_seconds = 300
 
 class PiSugar():
+	debug_mode = False
+	LOG_FILENAME="pi-sugar.log"
+	folder_name = '.pi-sugar'
+	config_file = 'config.json'
+	pi_sugar_path = os.path.join(str(Path.home()), folder_name)
+	interval_seconds = 300
+	ip_show_seconds = 6
 
 	logger = None
 	config = {}
@@ -46,12 +34,19 @@ class PiSugar():
 	
 
 	def initialize(self):
+		if (len(sys.argv) > 1 and sys.argv[1] == "debug"):
+			debug_mode = True
+			ip_show_seconds = 2
+
+		Path(pi_sugar_path).mkdir(exist_ok=True) 
 		self.__init_logger()
 		self.logger.info("Application Start")
 		#self.logger.info(platform.python_version())
 		if (debug_mode):
+			from console_display import ConsoleDisplay
 			self.glucoseDisplay = ConsoleDisplay()
 		else:
+			from twoline_display import TwolineDisplay
 			self.glucoseDisplay = TwolineDisplay()
 		self.glucoseDisplay.clear()
 
@@ -67,7 +62,7 @@ class PiSugar():
 		handler.setFormatter(formatter)
 		self.logger.addHandler(handler)
 
-	def get_reader(self):
+	def __get_reader(self):
 		if (self.config["data_source"] == "dexcom"):
 			self.logger.info('Loading dexcom reader')
 			self.reader = DexcomReader(self.logger)
@@ -80,7 +75,7 @@ class PiSugar():
 			self.reader = None
 			return False
 
-	def read_config(self):
+	def __read_config(self):
 		self.config.update(loadConfigDefaults())
 		try:
 			f = open(os.path.join(pi_sugar_path, config_file), "r")
@@ -104,16 +99,16 @@ class PiSugar():
 		lastReading = None
 		validToken = False
 		
-		self.show_ip(ip_show_seconds)
+		self.__show_ip(ip_show_seconds)
 		self.glucoseDisplay.show_centered(0, "Initializing")
 		
 		while True:
-			if (not self.read_config()):
+			if (not self.__read_config()):
 				self.glucoseDisplay.show_centered(0, "Invalid")
 				self.glucoseDisplay.show_centered(1, "Acct Info")
 				time.sleep(10)
 				continue;
-			if(self.get_reader()):
+			if(self.__get_reader()):
 				break;
 
 		nextRunTime = now_plus_seconds(0)
@@ -131,8 +126,8 @@ class PiSugar():
 				continue
 
 			if (not validToken):
-				login_attempts += 1
 				validToken = self.reader.login()
+				login_attempts += 1
 				if (not validToken):
 					if (login_attempts > 3):
 						nextRunTime = now_plus_seconds(60)
@@ -179,20 +174,13 @@ class PiSugar():
 					nextRunTime = lastReading.timestamp + datetime.timedelta(seconds=310)
 
 
-
-	def show_ip(self,seconds):
+	def __show_ip(self,seconds):
 		for x in range(0, seconds):
 			ip = get_ip_address('wlan0')
 			print(ip)
 			self.glucoseDisplay.show_centered(0,ip)
 			time.sleep(1)
 
-def loadConfigDefaults():
-	configDefaults = { "use_animation": False }	
-	return configDefaults
 
-app = PiSugar()
-app.initialize()
-app.run()
 
 
