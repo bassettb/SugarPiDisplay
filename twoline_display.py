@@ -1,6 +1,5 @@
 from RPi import GPIO
 import smbus
-#from RPLCD.gpio import CharLCD
 from RPLCD.i2c import CharLCD
 
 
@@ -9,18 +8,11 @@ class TwolineDisplay:
 	__lcd = None
 	__animIdx = -1
 	__animChars = []
+	__screenMode = ""
 
 	def __init__(self):
-
-		#	lcd = CharLCD(pin_rs=36, pin_rw=38, pin_e=40, pins_data=[31, 33, 35, 37],
-		#				  numbering_mode=GPIO.BOARD,
-		#				  cols=16, rows=2, 
-		#				  dotsize=8,
-		#				  charmap='A02',
-		#				  auto_linebreaks=True)
-		
 		port = 1
-		addr = self.find_device(port)
+		addr = self.__find_device(port)
 		if (addr < 1):
 			raise exception
 		self.__lcd = CharLCD(i2c_expander='PCF8574', address=addr, port=port,
@@ -34,7 +26,7 @@ class TwolineDisplay:
 		return None
 
 
-	def find_device(self,port):
+	def __find_device(self,port):
 		bus = smbus.SMBus(port) # 1 indicates /dev/i2c-1
 		for device in range(128):
 			try:
@@ -45,29 +37,18 @@ class TwolineDisplay:
 				pass
 		return -1
 
-
 	def clear(self):
 		self.__lcd.clear()
-
+		self.__screenMode = ""
 
 	def show_centered(self,line,text):
+		__setScreenModeToText()
 		print(text)
 		self.__lcd.cursor_pos = (line, 0)
 		self.__lcd.write_string(text.center(16))
-	
-
-	# NONE = 0
-	# DoubleUp = 1
-	# SingleUp = 2
-	# FortyFiveUp = 3
-	# Flat = 4
-	# FortyFiveDown = 5
-	# SingleDown = 6
-	# DoubleDown = 7
-	#  'NOT COMPUTABLE': 8
-	#  'RATE OUT OF RANGE': 9
 
 	def update_value_time_trend(self,value,mins,trend):
+		self.__setScreenModeToEgv()
 		valStr = "--"
 		trendChars = "  "
 		if (value > 0):
@@ -88,6 +69,7 @@ class TwolineDisplay:
 		
 
 	def update_age(self, mins):
+		self.__setScreenModeToEgv()
 		ageStr = "now"
 		if (mins > 50):
 			ageStr = "50+"
@@ -102,6 +84,7 @@ class TwolineDisplay:
 		
 
 	def updateAnimation(self):
+		self.__setScreenModeToEgv()
 		self.__animIdx += 1
 		if (self.__animIdx >= len(self.__animChars)):
 			self.__animIdx = 0
@@ -109,6 +92,15 @@ class TwolineDisplay:
 		self.__lcd.cursor_pos = (0, 15)
 		self.__lcd.write_string(char)
 		
+	def __setScreenModeToEgv(self):
+		if (not self.__screenMode == "egv"):
+			self.__screenMode = "egv"
+			self.__lcd.clear()
+			
+	def __setScreenModeToText(self):
+		if (not self.__screenMode == "text"):
+			self.__screenMode = "text"
+			self.__lcd.clear()
 		
 	def __get_trend_chars(self,trend):
 		if(trend == 0):
@@ -188,35 +180,35 @@ class TwolineDisplay:
 		self.__animChars = [ '\x05', '\x06', '\x07' ]
 
 		anim1 = (
+			 0b00000,
+			 0b00000,
+			 0b00000,
+			 0b00000,
+			 0b00000,
+			 0b00000,
 			 0b00010,
-			 0b00001,
-			 0b00001,
-			 0b00001,
-			 0b00000,
-			 0b00000,
-			 0b00000,
 			 0b00000
 		)
 		self.__lcd.create_char(5, anim1)
 		
 		anim2 = (
-			 0b01100,
-			 0b10000,
-			 0b10000,
 			 0b00000,
 			 0b00000,
 			 0b00000,
+			 0b00100,
+			 0b01010,
+			 0b00100,
 			 0b00000,
 			 0b00000
 		)
 		self.__lcd.create_char(6, anim2)
 		
 		anim3 = (
+			 0b01100,
+			 0b10010,
+			 0b10010,
+			 0b01100,
 			 0b00000,
-			 0b00000,
-			 0b00000,
-			 0b10000,
-			 0b01110,
 			 0b00000,
 			 0b00000,
 			 0b00000

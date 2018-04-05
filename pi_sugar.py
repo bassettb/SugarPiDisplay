@@ -124,7 +124,7 @@ class PiSugar():
 				readingAgeMins = get_reading_age_minutes(lastReading.timestamp)
 				self.glucoseDisplay.update_age(readingAgeMins)
 
-			if (self.config['animation']):
+			if (self.config['use_animation']):
 				self.glucoseDisplay.updateAnimation()
 
 			if (nextRunTime > datetime.datetime.utcnow()):
@@ -142,9 +142,6 @@ class PiSugar():
 					continue
 			login_attempts = 0
 
-			self.glucoseDisplay.clear()
-			self.glucoseDisplay.update_value_time_trend(0, 0, 0)
-
 			resp = self.reader.get_latest_gv()
 			if 'invalidResponse' in resp.keys():
 				nextRunTime = now_plus_seconds(60)
@@ -161,7 +158,10 @@ class PiSugar():
 			isNewReading = ((lastReading is None) or (lastReading.timestamp != reading.timestamp))
 			readingAgeMins = get_reading_age_minutes(reading.timestamp)
 			if (isNewReading):
-				self.glucoseDisplay.update_value_time_trend(reading.value, readingAgeMins, reading.trend)
+				if (readingAgeMins >= 20):
+					self.glucoseDisplay.update_value_time_trend(0, readingAgeMins, 0)
+				else:
+					self.glucoseDisplay.update_value_time_trend(reading.value, readingAgeMins, reading.trend)
 				lastReading = reading
 				nextRunTime = reading.timestamp + datetime.timedelta(seconds=(interval_seconds+10))
 			else:
@@ -188,7 +188,7 @@ class PiSugar():
 			time.sleep(1)
 
 def loadConfigDefaults():
-	configDefaults = { "animation": False }	
+	configDefaults = { "use_animation": False }	
 	return configDefaults
 
 app = PiSugar()
