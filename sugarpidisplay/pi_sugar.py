@@ -2,6 +2,7 @@
 import os
 import sys
 import platform
+import threading
 import http.client
 import datetime
 import time
@@ -12,10 +13,10 @@ from logging.handlers import RotatingFileHandler
 import json
 from pathlib import Path
 
-from utils import *
-from config_utils import *
-from nightscout_reader import NightscoutReader
-from dexcom_reader import DexcomReader
+from .utils import *
+from .config_utils import *
+from .nightscout_reader import NightscoutReader
+from .dexcom_reader import DexcomReader
 
 
 class PiSugar():
@@ -32,30 +33,35 @@ class PiSugar():
 	glucoseDisplay = None
 	reader = None
 	
-	def start_config_server(self):
-		from sugarpiconfig import app
-		HOST = environ.get('SERVER_HOST', '0.0.0.0')
+	def config_server_thread(self):
+		from .sugarpiconfig import app
+		HOST = '0.0.0.0'
 		PORT = 8080
 		app.run(HOST, PORT)
+
+	def start_config_server(self):
+		#thread.start_new_thread(config_server_thread,())
+		thread = threading.Thread(target=self.config_server_thread)
+		thread.start()
 
 
 	def initialize(self):
 		if (len(sys.argv) > 1 and sys.argv[1] == "debug"):
-			debug_mode = True
-			ip_show_seconds = 2
+			self.debug_mode = True
+			self.ip_show_seconds = 2
 
-		Path(pi_sugar_path).mkdir(exist_ok=True) 
+		Path(self.pi_sugar_path).mkdir(exist_ok=True) 
 		self.__init_logger()
 		self.logger.info("Application Start")
 		
 		self.start_config_server()
 		
 		#self.logger.info(platform.python_version())
-		if (debug_mode):
-			from console_display import ConsoleDisplay
+		if (self.debug_mode):
+			from .console_display import ConsoleDisplay
 			self.glucoseDisplay = ConsoleDisplay()
 		else:
-			from twoline_display import TwolineDisplay
+			from .twoline_display import TwolineDisplay
 			self.glucoseDisplay = TwolineDisplay()
 		self.glucoseDisplay.clear()
 
@@ -64,7 +70,7 @@ class PiSugar():
 		self.logger = logging.getLogger(__name__)
 		self.logger.setLevel(logging.INFO)
 
-		handler = RotatingFileHandler(os.path.join(pi_sugar_path, LOG_FILENAME), maxBytes=131072, backupCount=10)
+		handler = RotatingFileHandler(os.path.join(self.pi_sugar_path, self.LOG_FILENAME), maxBytes=131072, backupCount=10)
 		handler.setLevel(logging.INFO)
 
 		formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
@@ -87,7 +93,7 @@ class PiSugar():
 	def __read_config(self):
 		self.config.update(loadConfigDefaults())
 		try:
-			f = open(os.path.join(pi_sugar_path, config_file), "r")
+			f = open(os.path.join(self.pi_sugar_path, self.config_file), "r")
 			configFromFile = json.load(f)
 			f.close()
 		except:
@@ -108,7 +114,7 @@ class PiSugar():
 		lastReading = None
 		validToken = False
 		
-		self.__show_ip(ip_show_seconds)
+		self.__show_ip(self.ip_show_seconds)
 		self.glucoseDisplay.show_centered(0, "Initializing")
 		
 		while True:
@@ -167,7 +173,7 @@ class PiSugar():
 				else:
 					self.glucoseDisplay.update_value_time_trend(reading.value, readingAgeMins, reading.trend)
 				lastReading = reading
-				nextRunTime = reading.timestamp + datetime.timedelta(seconds=(interval_seconds+10))
+				nextRunTime = reading.timestamp + datetime.timedelta(seconds=(self.interval_seconds+10))
 			else:
 				if (readingAgeMins >= 20):
 					self.glucoseDisplay.update_value_time_trend(0, readingAgeMins, 0)

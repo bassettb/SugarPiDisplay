@@ -3,8 +3,8 @@ import datetime
 import time
 import re
 import json
-from utils import *
-from trend import Trend
+from .utils import *
+from .trend import Trend
 
 host = "share1.dexcom.com"
 login_resource = "/ShareWebServices/Services/General/LoginPublisherAccountByName"

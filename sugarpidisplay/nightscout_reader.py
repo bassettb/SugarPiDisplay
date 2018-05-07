@@ -3,8 +3,8 @@ import datetime
 import time
 import re
 import json
-from utils import *
-from trend import Trend
+from .utils import *
+from .trend import Trend
 
 ns_login_resource = "/api/v2/authorization/request"
 ns_latestgv_resource = "/api/v1/entries"

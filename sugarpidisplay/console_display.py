@@ -1,4 +1,4 @@
-from trend import Trend
+from .trend import Trend
 
 class ConsoleDisplay:
 

@@ -5,7 +5,7 @@ import os
 import json
 from datetime import datetime
 from flask import Flask, redirect, request, render_template, flash
-from pi_sugar_webconfig import app
+from . import app
 from flask_wtf import FlaskForm
 from wtforms import StringField,SelectField,PasswordField,BooleanField
 from wtforms.validators import InputRequired,ValidationError
