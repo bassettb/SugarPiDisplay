@@ -34,6 +34,7 @@ Supported I²C Port Expanders
 
 License
 =======
+
 This code is licensed under the MIT license, see the `LICENSE file
 <https://github.com/bassettb/SugarPiDisplay/blob/master/LICENSE>`_ or `tldrlegal
 <http://www.tldrlegal.com/license/mit-license>`_ for more information. 
