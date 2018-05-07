@@ -5,6 +5,12 @@ class ConsoleDisplay:
 	def __init__(self):
 		return None
 	
+	def open(self):
+		return True
+		
+	def close(self):
+		return True
+	
 	def clear(self):
 		pass
 		

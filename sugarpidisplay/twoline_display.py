@@ -1,4 +1,3 @@
-from RPi import GPIO
 import smbus
 from RPLCD.i2c import CharLCD
 
@@ -9,22 +8,29 @@ class TwolineDisplay:
 	__animIdx = -1
 	__animChars = []
 	__screenMode = ""
+	__port = 1
 
 	def __init__(self):
-		port = 1
-		addr = self.__find_device(port)
+		return None
+
+	def open(self):
+		addr = self.__find_device(__port)
 		if (addr < 1):
 			raise exception
-		self.__lcd = CharLCD(i2c_expander='PCF8574', address=addr, port=port,
+		self.__lcd = CharLCD(i2c_expander='PCF8574', address=addr, port=self.__port,
 				  cols=16, rows=2, dotsize=8,
 				  #charmap='A02',
 				  auto_linebreaks=True,
 				  backlight_enabled=True)
 		self.__lcd.clear()
+		self.__create_custom_chars()
+		return True
 
-		self.__create_custom_chars()	
-		return None
-
+	def close(self):
+		self.__lcd.clear()
+		self.__lcd.close()
+		self.__lcd = None
+		return True
 
 	def __find_device(self,port):
 		bus = smbus.SMBus(port) # 1 indicates /dev/i2c-1

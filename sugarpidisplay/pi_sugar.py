@@ -2,12 +2,12 @@
 import os
 import sys
 import platform
+import signal
 import threading
 import http.client
 import datetime
 import time
 from enum import Enum
-import re
 import logging
 from logging.handlers import RotatingFileHandler
 import json
@@ -20,6 +20,7 @@ from .dexcom_reader import DexcomReader
 
 
 class PiSugar():
+	exit_event_handler = None
 	debug_mode = False
 	LOG_FILENAME="pi-sugar.log"
 	folder_name = '.pi-sugar'
@@ -33,19 +34,19 @@ class PiSugar():
 	glucoseDisplay = None
 	reader = None
 	
-	def config_server_thread(self):
+	def config_server_worker(self):
 		from .sugarpiconfig import app
 		HOST = '0.0.0.0'
-		PORT = 8080
+		PORT = 80
 		app.run(HOST, PORT)
 
 	def start_config_server(self):
-		#thread.start_new_thread(config_server_thread,())
-		thread = threading.Thread(target=self.config_server_thread)
+		thread = threading.Thread(target=self.config_server_worker, daemon=True)
 		thread.start()
 
 
 	def initialize(self):
+		self.exit_event_handler = ExitEventHandler()
 		if (len(sys.argv) > 1 and sys.argv[1] == "debug"):
 			self.debug_mode = True
 			self.ip_show_seconds = 2
@@ -63,6 +64,7 @@ class PiSugar():
 		else:
 			from .twoline_display import TwolineDisplay
 			self.glucoseDisplay = TwolineDisplay()
+		self.glucoseDisplay.open()
 		self.glucoseDisplay.clear()
 
 		
@@ -128,7 +130,9 @@ class PiSugar():
 
 		nextRunTime = now_plus_seconds(0)
 		while True:
-			time.sleep(3)
+			if (self.exit_event_handler.exit_now):
+				break;
+			time.sleep(2)
 
 			if lastReading is not None:
 				readingAgeMins = get_reading_age_minutes(lastReading.timestamp)
@@ -187,6 +191,9 @@ class PiSugar():
 				else:
 					# We shouldn't get here.  A non-new reading should be older than 5 minutes
 					nextRunTime = lastReading.timestamp + datetime.timedelta(seconds=310)
+					
+		print("Exiting SugarPiDisplay")
+		self.glucoseDisplay.close()
 
 
 	def __show_ip(self,seconds):
@@ -196,6 +203,15 @@ class PiSugar():
 			self.glucoseDisplay.show_centered(0,ip)
 			time.sleep(1)
 
+
+class ExitEventHandler:
+	exit_now = False
+	def __init__(self):
+		signal.signal(signal.SIGINT, self.handle_exit_signal)
+		signal.signal(signal.SIGTERM, self.handle_exit_signal)
+
+	def handle_exit_signal(self,signum, frame):
+		self.exit_now = True
 
 
 

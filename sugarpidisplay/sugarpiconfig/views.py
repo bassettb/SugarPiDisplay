@@ -3,13 +3,12 @@ Routes and views for the flask application.
 """
 import os
 import json
-from datetime import datetime
 from flask import Flask, redirect, request, render_template, flash
-from . import app
+from pathlib import Path
 from flask_wtf import FlaskForm
 from wtforms import StringField,SelectField,PasswordField,BooleanField
 from wtforms.validators import InputRequired,ValidationError
-from pathlib import Path
+from . import app
 
 source_dexcom = 'dexcom'
 source_nightscout = 'nightscout'
