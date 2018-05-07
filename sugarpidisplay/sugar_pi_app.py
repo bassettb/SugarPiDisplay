@@ -19,7 +19,7 @@ from .nightscout_reader import NightscoutReader
 from .dexcom_reader import DexcomReader
 
 
-class PiSugar():
+class SugarPiApp():
 	exit_event_handler = None
 	debug_mode = False
 	LOG_FILENAME="pi-sugar.log"

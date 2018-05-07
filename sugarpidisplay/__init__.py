@@ -1,4 +1,4 @@
-from .pi_sugar import PiSugar
+from .sugar_pi_app import SugarPiApp
 
-#app = PiSugar()
+#app = SugarPiApp()
 #app.initialize()

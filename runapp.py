@@ -1,6 +1,6 @@
-from sugarpidisplay import PiSugar
+from sugarpidisplay import SugarPiApp
 
 
-app = PiSugar()
+app = SugarPiApp()
 app.initialize()
 app.run()
