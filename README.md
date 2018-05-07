@@ -1,7 +1,7 @@
 SugarPiDisplay
 ##############
 
-Display you CGM data on a small lcd character display anywhere in your house.
+Display your CGM data on a small lcd character display anywhere in your house.
 Runs on a Raspberry Pi.
 
 Features
@@ -11,7 +11,7 @@ Features
 - Shows latest glucose value, trend arrow, minutes since last reading
 - Parts can be purchased for under $50
 - Step-by-step instructions for setting up the Raspberry Pi.
-- Easy web interface for configuring your Dexcom or Nightscout access.
+- Easy web interface for configuring access to your Dexcom or Nightscout data.
 
 
 Recommended Setup
@@ -34,6 +34,7 @@ Supported I²C Port Expanders
 
 License
 =======
+
 This code is licensed under the MIT license, see the `LICENSE file
 <https://github.com/bassettb/SugarPiDisplay/blob/master/LICENSE>`_ or `tldrlegal
 <http://www.tldrlegal.com/license/mit-license>`_ for more information. 
