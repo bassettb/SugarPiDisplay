@@ -32,6 +32,12 @@ class PiSugar():
 	glucoseDisplay = None
 	reader = None
 	
+	def start_config_server(self):
+		from sugarpiconfig import app
+		HOST = environ.get('SERVER_HOST', '0.0.0.0')
+		PORT = 8080
+		app.run(HOST, PORT)
+
 
 	def initialize(self):
 		if (len(sys.argv) > 1 and sys.argv[1] == "debug"):
@@ -41,6 +47,9 @@ class PiSugar():
 		Path(pi_sugar_path).mkdir(exist_ok=True) 
 		self.__init_logger()
 		self.logger.info("Application Start")
+		
+		self.start_config_server()
+		
 		#self.logger.info(platform.python_version())
 		if (debug_mode):
 			from console_display import ConsoleDisplay

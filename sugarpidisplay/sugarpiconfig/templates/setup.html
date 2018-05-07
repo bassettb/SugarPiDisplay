@@ -1,0 +1,46 @@
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
+
+<form method="POST" action="{{ url_for('setup') }}" name="configForm">
+    <br />
+    {{ form.data_source.label}}    {{ form.data_source}}
+    <br />
+    {{ form.use_animation.label}}    {{ form.use_animation}}
+    <br />
+    <br />
+    <div class="setting dexcom">
+        {{ form.dexcom_user.label }} {{ form.dexcom_user(size=40) }}
+        <br />
+        {{ form.dexcom_pass.label }} {{ form.dexcom_pass(size=40) }}
+    </div>
+    <div class="setting nightscout">
+        {{ form.ns_url.label }} {{ form.ns_url(size=200) }}
+        <br />
+        {{ form.ns_token.label }} {{ form.ns_token(size=40) }}
+    </div>
+    <br />
+    <input type="submit" value="Save">
+
+    {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+    {% endfor %}
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+    function setVisibility() {
+        source = document.configForm.data_source.value;
+        Array.from(document.getElementsByClassName("setting")).forEach(
+            function (element, index, array) {
+                element.style.display = (element.classList.contains(source)) ? 'block' : 'none';
+            })
+    }
+    
+    document.addEventListener('DOMContentLoaded', setVisibility, false);
+    document.configForm.data_source.onchange = setVisibility
+</script>
+{% endblock %}
