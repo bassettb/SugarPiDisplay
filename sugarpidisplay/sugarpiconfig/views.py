@@ -74,7 +74,7 @@ def handle_submit(form):
         config['dexcom_password'] = form.dexcom_pass.data
     else:
         config['nightscout_url'] = form.ns_url.data
-        config['nightscout_account_token'] = form.ns_token.data
+        config['nightscout_access_token'] = form.ns_token.data
 
     #__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     f = open(os.path.join(pi_sugar_path, config_file), "w")
@@ -99,8 +99,8 @@ def loadData(form):
             if (config['data_source'] == source_nightscout):
                 if ('nightscout_url' in config):
                     form.ns_url.data = config['nightscout_url'] 
-                if ('nightscout_account_token' in config):
-                    form.ns_token.data = config['nightscout_account_token']
+                if ('nightscout_access_token' in config):
+                    form.ns_token.data = config['nightscout_access_token']
         form.use_animation.data = config['use_animation']
     except:
         pass

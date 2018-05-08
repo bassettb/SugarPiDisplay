@@ -20,11 +20,11 @@ class NightscoutReader():
 	
 	def set_config(self, config):
 		self.__config.clear()
-		if 'nightscout_url' not in config.keys() or 'nightscout_accessToken' not in config.keys():
-			logger.error('Invalid Nightscout config values')
+		if 'nightscout_url' not in config.keys() or 'nightscout_access_token' not in config.keys():
+			self.__logger.error('Invalid Nightscout config values')
 			return False
 		self.__config['url'] = config['nightscout_url']
-		self.__config['accessToken'] = config['nightscout_accessToken']
+		self.__config['accessToken'] = config['nightscout_access_token']
 		return True
 	
 	def login(self):
