@@ -14,7 +14,7 @@ class TwolineDisplay:
 		return None
 
 	def open(self):
-		addr = self.__find_device(__port)
+		addr = self.__find_device(self.__port)
 		if (addr < 1):
 			raise exception
 		self.__lcd = CharLCD(i2c_expander='PCF8574', address=addr, port=self.__port,
@@ -48,7 +48,7 @@ class TwolineDisplay:
 		self.__screenMode = ""
 
 	def show_centered(self,line,text):
-		__setScreenModeToText()
+		self.__setScreenModeToText()
 		print(text)
 		self.__lcd.cursor_pos = (line, 0)
 		self.__lcd.write_string(text.center(16))

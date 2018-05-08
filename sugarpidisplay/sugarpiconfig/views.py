@@ -13,8 +13,8 @@ from . import app
 source_dexcom = 'dexcom'
 source_nightscout = 'nightscout'
 
-LOG_FILENAME="pi-sugar.log"
-folder_name = '.pi-sugar'
+LOG_FILENAME="sugarpidisplay.log"
+folder_name = '.sugarpidisplay'
 config_file = 'config.json'
 pi_sugar_path = os.path.join(str(Path.home()), folder_name)
 Path(pi_sugar_path).mkdir(exist_ok=True) 
