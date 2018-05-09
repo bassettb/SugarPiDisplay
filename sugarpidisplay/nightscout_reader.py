@@ -124,7 +124,7 @@ class NightscoutReader():
 			url = url[8:]
 			return http.client.HTTPSConnection(url)
 		else:
-			return http.client.HTTPSConnection(url)
+			return http.client.HTTPConnection(url)
 	
 	def __translateTrend(self, trendStr):
 		if(trendStr == "DoubleUp"):

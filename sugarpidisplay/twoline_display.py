@@ -1,5 +1,7 @@
 import smbus
 from RPLCD.i2c import CharLCD
+from .trend import Trend
+
 
 
 class TwolineDisplay:
@@ -109,30 +111,29 @@ class TwolineDisplay:
 			self.__lcd.clear()
 		
 	def __get_trend_chars(self,trend):
-		if(trend == 0):
+		if(trend == Trend.NONE):
 			return "**"
-		if(trend == 1):
+		if(trend == Trend.DoubleUp):
 			return "\x01\x01"
-		if(trend == 2):
+		if(trend == Trend.SingleUp):
 			return "\x01 "
-		if(trend == 3):
+		if(trend == Trend.FortyFiveUp):
 			return "\x02 "
-		if(trend == 4):
+		if(trend == Trend.Flat):
 			return "-\x7e"
-		if(trend == 5):
+		if(trend == Trend.FortyFiveDown):
 			return "\x03 "
-		if(trend == 6):
+		if(trend == Trend.SingleDown):
 			return "\x04 "
-		if(trend == 7):
+		if(trend == Trend.DoubleDown):
 			return "\x04\x04"
-		if(trend == 8):
+		if(trend == Trend.NotComputable):
 			return "NC"
-		if(trend == 9):
+		if(trend == Trend.RateOutOfRange):
 			return "HI"
 		return "??"
 		#self.__lcd.write_string('\x02\x02 \x02 \x03 -\x7e \x05 \x06 \x06\x06')
 
-	
 	def __create_custom_chars(self):
 		upArrow = (
 			 0b00000,

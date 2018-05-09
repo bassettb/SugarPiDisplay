@@ -111,7 +111,7 @@ class DexcomReader():
 			timestamp = datetime.datetime.utcfromtimestamp(int(epochStr)//1000)
 			minutes_old = get_reading_age_minutes(timestamp)
 			value = obj["Value"]
-			trend = obj["Trend"]
+			trend = self.__translateTrend(obj["Trend"])
 			self.__logger.info("parsed: " + str(timestamp) + "   " + str(value) + "   " + str(trend) + "   " + str(minutes_old) + " mins" )
 			if(timestamp > datetime.datetime.utcnow()):
 				timestamp = datetime.datetime.utcnow()
@@ -136,3 +136,25 @@ class DexcomReader():
 		if (result['status'] == 401 or result['status'] == 403):
 		    return True
 		return False
+
+	def __translateTrend(self, trendNum):
+		if(trendNum == 1):
+			return Trend.DoubleUp
+		elif(trendNum == 2):
+			return Trend.SingleUp
+		elif(trendNum == 3):
+			return Trend.FortyFiveUp
+		elif(trendNum == 4):
+			return Trend.Flat
+		elif(trendNum == 5):
+			return Trend.FortyFiveDown
+		elif(trendNum == 6):
+			return Trend.SingleDown
+		elif(trendNum == 7):
+			return Trend.DoubleDown
+		elif(trendNum == 8):
+			return Trend.NotComputable
+		elif(trendNum == 9):
+			return Trend.RateOutOfRange
+		else:
+			return Trend.NONE
