@@ -1,16 +1,19 @@
 SugarPiDisplay
 ##############
 
-Display your CGM data on a small lcd character display anywhere in your house.
-Runs on a Raspberry Pi.
+Display your CGM data on a small LCD character display anywhere in your home or office.
+Runs on a $10 Raspberry Pi.
+
+.. image:: https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/image1.jpg
+    :alt: Photo of SugarPiDisplay
 
 Features
 --------
 
-- Works with Dexcom Share or Nightscout.
+- Connects to either Dexcom Share or Nightscout.
 - Shows latest glucose value, trend arrow, minutes since last reading
 - Parts can be purchased for under $50
-- Step-by-step instructions for setting up the Raspberry Pi.
+- Step-by-step instructions for setting up the Raspberry Pi (coming soon)
 - Easy web interface for configuring access to your Dexcom or Nightscout data.
 
 
@@ -18,13 +21,14 @@ Recommended Setup
 -----------------
 
 - Raspberry Pi Zero W with soldered pin headers
-- 2x16 LCD Character display with i2c backpack board
-- Female-to-Female wiring harness with 4 wires
+- 2x16 LCD Character display with i2c port expander (backpack board)
+- Wiring harness with 4 wires
 - 4GB micro SDCard
 
 Depending on your display location, you might also want:
+
 - Case for the Pi Zero W
-- Acryllic stand for the LCD display
+- Stand for the LCD display (Adafruit sells a great acrylic stand)
 
 
 Supported I²C Port Expanders
