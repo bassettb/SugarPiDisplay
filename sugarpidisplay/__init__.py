@@ -1,4 +1,2 @@
-from .sugar_pi_app import SugarPiApp
-
-#app = SugarPiApp()
-#app.initialize()
+#from .sugar_pi_app import SugarPiApp
+__all__ = ['SugarPiApp']

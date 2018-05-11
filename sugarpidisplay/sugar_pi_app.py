@@ -22,8 +22,8 @@ from .dexcom_reader import DexcomReader
 class SugarPiApp():
 	exit_event_handler = None
 	debug_mode = False
-	LOG_FILENAME="pi-sugar.log"
-	folder_name = '.pi-sugar'
+	LOG_FILENAME="sugarpidisplay.log"
+	folder_name = '.sugarpidisplay'
 	config_file = 'config.json'
 	pi_sugar_path = os.path.join(str(Path.home()), folder_name)
 	interval_seconds = 300
@@ -37,7 +37,7 @@ class SugarPiApp():
 	def config_server_worker(self):
 		from .sugarpiconfig import app
 		HOST = '0.0.0.0'
-		PORT = 80
+		PORT = 8080
 		app.run(HOST, PORT)
 
 	def start_config_server(self):
