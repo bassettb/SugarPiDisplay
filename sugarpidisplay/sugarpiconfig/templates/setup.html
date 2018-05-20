@@ -1,7 +1,10 @@
-{% block content %}
-
+<html>
+<head>
 <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
+<meta name="viewport" content="width=device-width"/>
+</head>
 
+<body>
 <form method="POST" action="{{ url_for('setup') }}" name="configForm">
     <br />
     {{ form.data_source.label}}    {{ form.data_source}}
@@ -27,10 +30,6 @@
     {% endfor %}
 
 </form>
-{% endblock %}
-
-{% block scripts %}
-
 <script>
     function setVisibility() {
         source = document.configForm.data_source.value;
@@ -43,4 +42,5 @@
     document.addEventListener('DOMContentLoaded', setVisibility, false);
     document.configForm.data_source.onchange = setVisibility
 </script>
-{% endblock %}
+</body>
+</html>

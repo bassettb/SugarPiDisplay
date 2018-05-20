@@ -36,6 +36,10 @@ Supported I²C Port Expanders
 - PCF8574
 
 
+.. image:: https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/image1.jpg
+    :alt: Photo of SugarPiDisplay
+
+
 License
 =======
 
