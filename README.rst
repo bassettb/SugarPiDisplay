@@ -36,8 +36,13 @@ Supported I²C Port Expanders
 - PCF8574
 
 
-.. image:: https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/image1.jpg
-    :alt: Photo of SugarPiDisplay
+Web Interface
+-------------
+Once the Raspberry Pi Zero W is on your wifi network and SugarPiDisplay is running, it will display its IP address on the LCD display during bootup.  Put this IP into your browser, add ":8080" on the end, and you will get the configuration page seen below.
+
+.. image:: https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/ConfigScreenshot1.jpg
+    :alt: Photo of Config screen
+
 
 
 License
@@ -45,4 +50,4 @@ License
 
 This code is licensed under the MIT license, see the `LICENSE file
 <https://github.com/bassettb/SugarPiDisplay/blob/master/LICENSE>`_ or `tldrlegal
-<http://www.tldrlegal.com/license/mit-license>`_ for more information. 
+<http://www.tldrlegal.com/license/mit-license>`_ for more information.
