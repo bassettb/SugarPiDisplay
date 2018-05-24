@@ -1,0 +1,53 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:       sugarpidisplay
+# Required-Start: $remote_fs $syslog
+# Required-Stop:  $remote_fs $syslog
+# Default-Start:  2 3 4 5
+# Default-Stop:   0 1 6
+# Short-Description: Starts and stops SugarPiDisplay
+# Description:       Starts and stops SugarPiDisplay
+### END INIT INFO
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin 
+DAEMON=/home/pi/SugarPiDisplay/sugarpidisplay.sh
+NAME=sugarpidisplay
+DESC="Sugar Pi Display"
+DAEMON_USER=pi
+DAEMON_OPTS=""
+PIDFILE=/var/run/$NAME.pid
+
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+set -e
+
+case "$1" in
+  start)
+    #echo -n "Starting $DESC: "
+    # start-stop-daemon --start --pidfile /var/run/$NAME.pid --background --make-pidfile --exec $DAEMON
+    #echo "$NAME."
+    log_daemon_msg "Starting system $DAEMON_NAME daemon"
+    start-stop-daemon --start --background --pidfile $PIDFILE --make-pidfile --user $DAEMON_USER --chuid $DAEMON_USER --startas $DAEMON -- $DAEMON_OPTS
+    log_end_msg $?
+    ;;
+  stop)
+    echo -n "Stopping $DESC: "
+    start-stop-daemon --stop --oknodo --quiet --pidfile $PIDFILE
+    echo "$NAME."
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}" >&2
+    exit 1
+    ;;
+
+esac
+
+exit 0
