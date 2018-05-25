@@ -42,7 +42,7 @@ Once the Raspberry Pi Zero W is on your wifi network and SugarPiDisplay is runni
 Instructions
 ------------
 - `Hardware <https://github.com/bassettb/SugarPiDisplay/blob/master/docs/hardware_setup.rst>`_
-- `Software <https://github.com/bassettb/SugarPiDisplay/master/docs/software_setup.rst>`_
+- `Software <https://github.com/bassettb/SugarPiDisplay/blob/master/docs/software_setup.rst>`_
 
 
 License
