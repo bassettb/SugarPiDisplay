@@ -21,6 +21,8 @@ Wiring
 ======
 
 Pin 1 is above the microSD card slot
+
 .. image:: https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/wiring-i2c.png
     :alt: Wiring
+
 Thanks to the RPLCD project for the interface library and this wiring diagram.
