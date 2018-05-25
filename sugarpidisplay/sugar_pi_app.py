@@ -197,12 +197,22 @@ class SugarPiApp():
 
 
 	def __show_ip(self,seconds):
+		wait_text = "Waiting Wifi"
+		ip = ""
+		for x in range(0, 20):
+			ip = get_ip_address('wlan0')
+			if (ip == ""):
+				self.glucoseDisplay.show_centered(0,wait_text)
+			else:
+				break
+			time.sleep(1)
+		
 		for x in range(0, seconds):
 			ip = get_ip_address('wlan0')
-			print(ip)
 			self.glucoseDisplay.show_centered(0,ip)
 			time.sleep(1)
 
+		self.logger.info("Wifi IP: " + ip)
 
 class ExitEventHandler:
 	exit_now = False

@@ -18,7 +18,7 @@ try:
 			return ""
 except:
 	def get_ip_address(ifname):
-		return "Unknown IP"
+		return "No IP on PC"
 		
 def get_reading_age_minutes(timestamp):
 	delta = datetime.datetime.utcnow() - timestamp
