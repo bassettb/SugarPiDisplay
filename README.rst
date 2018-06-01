@@ -1,8 +1,8 @@
 SugarPiDisplay
 ##############
 
-Display your CGM data on a mini LCD display anywhere in your home or office.
-Runs on a $10 Raspberry Pi.
+Display your CGM data on a mini LCD display anywhere in your home or office.  
+
 
 .. image:: https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/image1.jpg
     :alt: Photo of SugarPiDisplay
@@ -12,7 +12,7 @@ Features
 
 - Connects to either Dexcom Share or Nightscout.
 - Shows latest glucose value, trend arrow, minutes since last reading
-- Parts can be purchased for under $50
+- Parts can be purchased for around $40
 - Step-by-step instructions for setting up the Raspberry Pi
 - Easy web interface for configuring access to your Dexcom or Nightscout data.
 

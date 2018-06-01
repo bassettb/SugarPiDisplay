@@ -2,15 +2,20 @@
 Hardware
 ========
 
-- Raspberry Pi Zero W with soldered pin headers
+- Raspberry Pi Zero W with soldered pin headers.  
 - 2x16 LCD Character display with i2c port expander (backpack board, currently only supports the PCF8574 chip)
 - Wiring harness with 4 female-female wires (Pi and LCD will both have standard 0.1" pins)
-- 4GB (or larger) micro SDCard
+- 4GB (or larger) microSD card
 
 Depending on your display location, you might also want:
 
 - Case for the Pi Zero W
 - Stand for the LCD display (Adafruit sells a great acrylic stand)
+
+Adapters
+========
+
+For setting up the Raspberry Pi, you will need a USB OTG cable for the keyboard and mini-HDMI cable.  Some Pi Zero W kits come with these cables or you might have them already.  
 
 Screens
 =======
