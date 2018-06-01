@@ -1,8 +1,8 @@
 SugarPiDisplay
 ##############
 
-Display your CGM data on a small LCD character display anywhere in your home or office.
-Runs on a $10 Raspberry Pi.
+Display your CGM data on a mini LCD display anywhere in your home or office.  
+
 
 .. image:: https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/image1.jpg
     :alt: Photo of SugarPiDisplay
@@ -12,18 +12,18 @@ Features
 
 - Connects to either Dexcom Share or Nightscout.
 - Shows latest glucose value, trend arrow, minutes since last reading
-- Parts can be purchased for under $50
-- Step-by-step instructions for setting up the Raspberry Pi (coming soon)
+- Parts can be purchased for around $40
+- Step-by-step instructions for setting up the Raspberry Pi
 - Easy web interface for configuring access to your Dexcom or Nightscout data.
 
 
-Recommended Setup
------------------
+Recommended Hardware
+--------------------
 
 - Raspberry Pi Zero W with soldered pin headers
-- 2x16 LCD Character display with i2c port expander (backpack board)
+- 2x16 LCD Character display with i2c port expander (backpack board, currently only supports the PCF8574 chip)
 - Wiring harness with 4 wires
-- 4GB micro SDCard
+- 4GB (or larger) micro SDCard
 
 Depending on your display location, you might also want:
 
@@ -31,18 +31,18 @@ Depending on your display location, you might also want:
 - Stand for the LCD display (Adafruit sells a great acrylic stand)
 
 
-Supported I²C Port Expanders
-----------------------------
-- PCF8574
-
 
 Web Interface
 -------------
-Once the Raspberry Pi Zero W is on your wifi network and SugarPiDisplay is running, it will display its IP address on the LCD display during bootup.  Put this IP into your browser, add ":8080" on the end, and you will get the configuration page seen below.
+Once the Raspberry Pi Zero W is on your wifi network and SugarPiDisplay is running, the IP address will be displayed on the LCD during bootup.  Type this IP into your browser, add ":8080" on the end, and you will get the configuration page seen below.
 
-.. image:: https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/ConfigScreenshot1.jpg
+.. image:: https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/ConfigScreenshot1.png
     :alt: Photo of Config screen
 
+Instructions
+------------
+- `Hardware <https://github.com/bassettb/SugarPiDisplay/blob/master/docs/hardware_setup.rst>`_
+- `Software <https://github.com/bassettb/SugarPiDisplay/blob/master/docs/software_setup.rst>`_
 
 
 License
