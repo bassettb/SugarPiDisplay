@@ -2,7 +2,10 @@ from .trend import Trend
 
 class ConsoleDisplay:
 
-	def __init__(self):
+	__logger = None
+
+	def __init__(self, logger):
+		self.__logger = logger
 		return None
 	
 	def open(self):
@@ -15,6 +18,7 @@ class ConsoleDisplay:
 		pass
 		
 	def show_centered(self,line,text):
+		self.__logger.debug("Display: " + text)
 		print(text)
 
 	def update_value_time_trend(self,value,mins,trend):

@@ -11,8 +11,10 @@ class TwolineDisplay:
 	__animChars = []
 	__screenMode = ""
 	__port = 1
+	__logger = None
 
-	def __init__(self):
+	def __init__(self, logger):
+		self.__logger = logger
 		return None
 
 	def open(self):
@@ -51,7 +53,7 @@ class TwolineDisplay:
 
 	def show_centered(self,line,text):
 		self.__setScreenModeToText()
-		print(text)
+		self.__logger.debug("Display: " + text)
 		self.__lcd.cursor_pos = (line, 0)
 		self.__lcd.write_string(text.center(16))
 
@@ -102,11 +104,13 @@ class TwolineDisplay:
 		
 	def __setScreenModeToEgv(self):
 		if (not self.__screenMode == "egv"):
+			self.__logger.debug("Display mode EGV")
 			self.__screenMode = "egv"
 			self.__lcd.clear()
 			
 	def __setScreenModeToText(self):
 		if (not self.__screenMode == "text"):
+			self.__logger.debug("Display mode Text")
 			self.__screenMode = "text"
 			self.__lcd.clear()
 		

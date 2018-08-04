@@ -21,13 +21,14 @@ from .dexcom_reader import DexcomReader
 
 class SugarPiApp():
 	exit_event_handler = None
-	debug_mode = False
 	LOG_FILENAME="sugarpidisplay.log"
 	folder_name = '.sugarpidisplay'
 	config_file = 'config.json'
 	pi_sugar_path = os.path.join(str(Path.home()), folder_name)
 	interval_seconds = 300
 	ip_show_seconds = 6
+	ip_show_seconds_pc_mode = 2
+	__args = {'debug_mode': False, 'pc_mode': False }
 
 	logger = None
 	config = {}
@@ -44,28 +45,34 @@ class SugarPiApp():
 		thread = threading.Thread(target=self.config_server_worker, daemon=True)
 		thread.start()
 
-
 	def initialize(self):
 		self.exit_event_handler = ExitEventHandler()
-		if (len(sys.argv) > 1 and sys.argv[1] == "debug"):
-			self.debug_mode = True
-			self.ip_show_seconds = 2
+		
+		self.__parse_args()
 
 		Path(self.pi_sugar_path).mkdir(exist_ok=True) 
+		
 		self.__init_logger()
 		self.logger.info("Application Start")
 		
 		self.start_config_server()
 		
 		#self.logger.info(platform.python_version())
-		if (self.debug_mode):
+		if (self.__args['pc_mode']):
 			from .console_display import ConsoleDisplay
-			self.glucoseDisplay = ConsoleDisplay()
+			self.glucoseDisplay = ConsoleDisplay(self.logger)
 		else:
 			from .twoline_display import TwolineDisplay
-			self.glucoseDisplay = TwolineDisplay()
+			self.glucoseDisplay = TwolineDisplay(self.logger)
 		self.glucoseDisplay.open()
 		self.glucoseDisplay.clear()
+
+	def __parse_args(self):
+		if (len(sys.argv) > 1 and sys.argv[1] == "debug"):
+			self.__args['debug_mode'] = True
+
+		if (len(sys.argv) > 1 and sys.argv[1] == "pc"):
+			self.__args['pc_mode'] = True
 
 		
 	def __init_logger(self):
@@ -74,7 +81,10 @@ class SugarPiApp():
 
 		handler = RotatingFileHandler(os.path.join(self.pi_sugar_path, self.LOG_FILENAME), maxBytes=131072, backupCount=10)
 		handler.setLevel(logging.INFO)
-
+		if (self.__args['debug_mode']):
+			self.logger.setLevel(logging.DEBUG)
+			handler.setLevel(logging.DEBUG)
+			
 		formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 		handler.setFormatter(formatter)
 		self.logger.addHandler(handler)
@@ -116,7 +126,7 @@ class SugarPiApp():
 		lastReading = None
 		validToken = False
 		
-		self.__show_ip(self.ip_show_seconds)
+		self.__show_ip()
 		self.glucoseDisplay.show_centered(0, "Initializing")
 		
 		while True:
@@ -196,16 +206,17 @@ class SugarPiApp():
 		self.glucoseDisplay.close()
 
 
-	def __show_ip(self,seconds):
+	def __show_ip(self):
+		seconds = self.ip_show_seconds_pc_mode if self.__args['pc_mode'] else self.ip_show_seconds
 		wait_text = "Waiting Wifi"
 		ip = ""
 		for x in range(0, 20):
 			ip = get_ip_address('wlan0')
 			if (ip == ""):
 				self.glucoseDisplay.show_centered(0,wait_text)
+				time.sleep(1)
 			else:
 				break
-			time.sleep(1)
 		
 		for x in range(0, seconds):
 			ip = get_ip_address('wlan0')
