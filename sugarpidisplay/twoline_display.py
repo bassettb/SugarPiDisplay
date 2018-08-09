@@ -57,6 +57,16 @@ class TwolineDisplay:
 		self.__lcd.cursor_pos = (line, 0)
 		self.__lcd.write_string(text.center(16))
 
+	def show_centered(self,line0,line1):
+		self.__setScreenModeToText()
+		self.__logger.debug("Display: " + (line0 if line0 is not None else "") + " || " + (line1 if line1 is not None else ""))
+		if (line0 is not None):
+			self.__lcd.cursor_pos = (0, 0)
+			self.__lcd.write_string(line0.center(16))
+		if (line1 is not None):
+			self.__lcd.cursor_pos = (1, 0)
+			self.__lcd.write_string(line1.center(16))
+
 	def update_value_time_trend(self,value,mins,trend):
 		self.__setScreenModeToEgv()
 		valStr = "--"
