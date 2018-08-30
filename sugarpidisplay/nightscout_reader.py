@@ -43,7 +43,7 @@ class NightscoutReader():
 			
 			respObj = json.loads(respStr)
 			self.__token = respObj['token']
-			self.__logger.info(self.__token)
+			self.__logger.debug(self.__token)
 			return True
 		except Exception as e:
 			self.__logger.error('Exception during login ' + str(e))
@@ -53,18 +53,16 @@ class NightscoutReader():
 		result = self.__make_request()
 		if (self.__check_session_expire(result)):
 			return {"tokenFailed" : True}
-		if (result['status'] != 200):
-			return {"invalidResponse" : True}
+		if (result['error'] is not None):
+			return {'errorMsg' : result['error']}
 
 		reading = self.__parse_gv(result['content'])
 		if (reading is None):
-			return {"invalidResponse" : True}
+			return {'errorMsg' : 'Bad Resp'}
 		return { 'reading' : reading }
-			#print (resp.status, resp.reason)
-			#print(str(resp.status) + " " + respBytes.decode("utf-8"))
 
 	def __make_request(self):
-		result = { 'status': 0, 'content': ''}
+		result = { 'status': 0, 'content': '', 'error': None}
 		try:
 			conn = self.__get_connection()
 
@@ -80,15 +78,22 @@ class NightscoutReader():
 			result['status'] = resp.status
 			if (resp.status != 200):
 				self.__logger.warning ("Response during get_latest_gv was " + str(resp.status))
+				result['error'] = "HTTP " + str(resp.status)
+				return result
 			result['content'] = resp.read().decode("utf-8")
+			return result
+		except HTTPException as e:
+			self.__logger.error('HTTPException during get_latest_gv ' + str(e))
+			result['error'] = "Network error"
 			return result
 		except Exception as e:
 			self.__logger.error('Exception during get_latest_gv ' + str(e))
+			result['error'] = "Req error"
 			return result
 
 	def __parse_gv(self,data):
 		try:
-			self.__logger.info(data)
+			self.__logger.debug(data)
 			obj = json.loads(data)
 			obj = obj[0]
 			epoch = obj["date"]
@@ -96,7 +101,8 @@ class NightscoutReader():
 			minutes_old = get_reading_age_minutes(timestamp)
 			value = obj["sgv"]
 			trend = self.__translateTrend(obj["direction"])
-			self.__logger.info("parsed: " + str(timestamp) + "   " + str(value) + "   " + str(trend) + "   " + str(minutes_old) + " mins" )
+			# Change this loglevel to INFO if you want each reading logged
+			self.__logger.debug("parsed: " + str(timestamp) + "   " + str(value) + "   " + str(trend) + "   " + str(minutes_old) + " mins" )
 			if(timestamp > datetime.datetime.utcnow()):
 				timestamp = datetime.datetime.utcnow()
 				self.__logger.warning("Corrected timestamp to now")

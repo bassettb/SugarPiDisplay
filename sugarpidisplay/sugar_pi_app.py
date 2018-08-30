@@ -126,11 +126,12 @@ class SugarPiApp():
 			self.config.clear()
 			return False
 
+		self.logger.info("Loaded config")
 		return True
 
 	
 	class Context:
-		NextRunTime = None
+		__NextRunTime = None
 		CurrentState = None
 		StateFunc = None		
 		LastReading = None
@@ -142,13 +143,13 @@ class SugarPiApp():
 			self.setNextRunDelaySeconds(0)
 	
 		def setNextRunDelaySeconds(self,seconds):
-			self.NextRunTime = now_plus_seconds(seconds)
+			self.__NextRunTime = now_plus_seconds(seconds)
 		
 		def setNextRunTimeAbsolute(self,time):
-			self.NextRunTime = time
+			self.__NextRunTime = time
 			
 		def isRunTime(self):
-			return (self.NextRunTime <= datetime.datetime.utcnow())
+			return (self.__NextRunTime <= datetime.datetime.utcnow())
 
 	
 	def run(self):
@@ -225,8 +226,8 @@ class SugarPiApp():
 		if (not self.__read_config() or not self.__get_reader()):
 			self.glucoseDisplay.show_centered("Invalid", "Config Info")
 			ctx.setNextRunDelaySeconds(5)
-		else:
-			ctx.setNextState(State.FirstLogin)
+			return
+		ctx.setNextState(State.FirstLogin)
 
 	def __runFirstLogin(self,ctx):
 		self.glucoseDisplay.show_centered("Attempting", "Login")
@@ -236,30 +237,33 @@ class SugarPiApp():
 		if (not self.reader.login()):
 			ctx.setNextRunDelaySeconds(60)
 			self.glucoseDisplay.show_centered("Login Failed", "Will Retry")
-		else:
-			ctx.setNextState(State.ReadValues)
+			return
+		self.logger.info("Successful login")
+		ctx.setNextState(State.ReadValues)
 
 	def __runReLogin(self,ctx):
+		ctx.IsNewState = False
 		self.__updateTickers(ctx)
 		if (not ctx.isRunTime()):
 			return
 		if (not self.reader.login()):
 			ctx.setNextState(State.FirstLogin)
 			ctx.setNextRunDelaySeconds(20)
-			self.glucoseDisplay.show_centered("Login Failed", "Will Retry")
-		else:
-			ctx.setNextState(State.ReadValues)
+			self.glucoseDisplay.show_centered("Re-login Failed", "Will Retry")
+			return
+		self.logger.info("Successful login refresh")
+		ctx.setNextState(State.ReadValues)
 
 	def __runReader(self,ctx):
+		ctx.IsNewState = False
 		self.__updateTickers(ctx)
 		if (not ctx.isRunTime()):
 			return
 		resp = self.reader.get_latest_gv()
-		if 'invalidResponse' in resp.keys():
+		if 'errorMsg' in resp.keys():
 			ctx.setNextRunDelaySeconds(60)
 			return
 
-		#self.logger.info(resp)  todo move to reader
 		if 'tokenFailed' in resp.keys():
 			ctx.setNextState(State.ReLogin)
 			return
