@@ -235,7 +235,7 @@ class SugarPiApp():
 		if (not ctx.isRunTime()):
 			return
 		if (not self.reader.login()):
-			ctx.setNextRunDelaySeconds(60)
+			ctx.setNextRunDelaySeconds(180)
 			self.glucoseDisplay.show_centered("Login Failed", "Will Retry")
 			return
 		self.logger.info("Successful login")
@@ -248,7 +248,7 @@ class SugarPiApp():
 			return
 		if (not self.reader.login()):
 			ctx.setNextState(State.FirstLogin)
-			ctx.setNextRunDelaySeconds(20)
+			ctx.setNextRunDelaySeconds(30)
 			self.glucoseDisplay.show_centered("Re-login Failed", "Will Retry")
 			return
 		self.logger.info("Successful login refresh")
@@ -261,7 +261,7 @@ class SugarPiApp():
 			return
 		resp = self.reader.get_latest_gv()
 		if 'errorMsg' in resp.keys():
-			ctx.setNextRunDelaySeconds(60)
+			ctx.setNextRunDelaySeconds(120)
 			return
 
 		if 'tokenFailed' in resp.keys():
