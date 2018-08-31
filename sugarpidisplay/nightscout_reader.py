@@ -94,8 +94,11 @@ class NightscoutReader():
 	def __parse_gv(self,data):
 		try:
 			self.__logger.debug(data)
-			obj = json.loads(data)
-			obj = obj[0]
+			list = json.loads(data)
+			if (len(list) == 0):
+				logger.warning("Nightscout responded with empty list")
+				return None
+			obj = list[0]
 			epoch = obj["date"]
 			timestamp = datetime.datetime.utcfromtimestamp(int(epoch//1000))
 			minutes_old = get_reading_age_minutes(timestamp)

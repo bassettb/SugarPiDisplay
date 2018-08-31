@@ -110,8 +110,11 @@ class DexcomReader():
 	def __parse_gv(self,data):
 		try:
 			self.__logger.debug(data)
-			obj = json.loads(data)
-			obj = obj[0]
+			list = json.loads(data)
+			if (len(list) == 0):
+				logger.warning("Dexcom responded with empty list")
+				return None
+			obj = list[0]
 			epochStr = re.sub('[^0-9]','', obj["WT"])
 			timestamp = datetime.datetime.utcfromtimestamp(int(epochStr)//1000)
 			minutes_old = get_reading_age_minutes(timestamp)
