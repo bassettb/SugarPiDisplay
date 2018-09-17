@@ -8,10 +8,10 @@ Configuring Raspberry Pi
 ==================================
 ``sudo raspi-config``
 
-- configure wifi
+- configure wifi (including country)
 - enable ssh   # this is optional
 - enable i2c
-- setup localization (the default GB keyboard layout will be a problem if your wifi password has any symbols)
+- set localization (timezone, language, keyboard.  The default GB keyboard layout will be a problem if your wifi password has any symbols)
 
 Once Wifi and SSH are configured, you can reboot and connect to it using SSH for the rest of the setup. 
 
@@ -30,13 +30,11 @@ Installing SugarPiDisplay
 =========================
 ``git clone https://github.com/bassettb/SugarPiDisplay.git``
 
-``cd SugarPiDisplay``
+``pip3 install SugarPiDisplay/``
 
-``pip3 install .``
+``chmod 755 SugarPiDisplay/install.sh``
 
-``chmod 755 install.sh``
-
-``install.sh``
+``SugarPiDisplay/install.sh``
 
 reboot the Raspberry Pi and SugarPiDisplay should be running
 
