@@ -6,7 +6,7 @@ from .utils import *
 from .trend import Trend
 
 ns_login_resource = "/api/v2/authorization/request"
-ns_latestgv_resource = "/api/v1/entries"
+ns_latestgv_resource = "/api/v1/entries/current"
 
 
 class NightscoutReader():
@@ -55,6 +55,9 @@ class NightscoutReader():
 			return {"tokenFailed" : True}
 		if (result['error'] is not None):
 			return {'errorMsg' : result['error']}
+		if (result['status'] != 200):
+			self.__logger.warning ("Response during get_latest_gv was " + str(result['status']))
+			return {'errorMsg' : "HTTP " + str(result['status'])}
 
 		reading = self.__parse_gv(result['content'])
 		if (reading is None):
@@ -70,19 +73,18 @@ class NightscoutReader():
 				'Accept':'application/json',
 				'Authorization': 'Bearer ' + self.__token
 			}
-			resource = ns_latestgv_resource + '?count=1'
+			resource = ns_latestgv_resource
 
 			conn.request("GET", resource, headers=headers)
 			resp = conn.getresponse()
 
 			result['status'] = resp.status
 			if (resp.status != 200):
-				self.__logger.warning ("Response during get_latest_gv was " + str(resp.status))
-				result['error'] = "HTTP " + str(resp.status)
 				return result
+			# Nightscout doesn't need content to check auth error
 			result['content'] = resp.read().decode("utf-8")
 			return result
-		except HTTPException as e:
+		except http.client.HTTPException as e:
 			self.__logger.error('HTTPException during get_latest_gv ' + str(e))
 			result['error'] = "Network error"
 			return result
@@ -99,6 +101,9 @@ class NightscoutReader():
 				logger.warning("Nightscout responded with empty list")
 				return None
 			obj = list[0]
+			if (obj["type"] != 'sgv'):
+				logger.warning("Nightscout: last entry was not sgv")
+				return None
 			epoch = obj["date"]
 			timestamp = datetime.datetime.utcfromtimestamp(int(epoch//1000))
 			minutes_old = get_reading_age_minutes(timestamp)

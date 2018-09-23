@@ -69,6 +69,9 @@ class DexcomReader():
 			return {"tokenFailed" : True}
 		if (result['error'] is not None):
 			return {'errorMsg' : result['error']}
+		if (result['status'] != 200):
+			self.__logger.warning ("Response during get_latest_gv was " + str(result['status']))
+			return {'errorMsg' : "HTTP " + str(result['status'])}
 
 		reading = self.__parse_gv(result['content'])
 		if (reading is None):
@@ -92,13 +95,9 @@ class DexcomReader():
 			resp = conn.getresponse()
 
 			result['status'] = resp.status
-			if (resp.status != 200):
-				self.__logger.warning ("Response during get_latest_gv was " + str(resp.status))
-				result['error'] = "HTTP " + str(resp.status)
-				return result
 			result['content'] = resp.read().decode("utf-8")
 			return result
-		except HTTPException as e:
+		except http.client.HTTPException as e:
 			self.__logger.error('HTTPException during get_latest_gv ' + str(e))
 			result['error'] = "Network error"
 			return result
