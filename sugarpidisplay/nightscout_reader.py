@@ -98,11 +98,11 @@ class NightscoutReader():
 			self.__logger.debug(data)
 			list = json.loads(data)
 			if (len(list) == 0):
-				logger.warning("Nightscout responded with empty list")
+				self.__logger.warning("Nightscout responded with empty list")
 				return None
 			obj = list[0]
 			if (obj["type"] != 'sgv'):
-				logger.warning("Nightscout: last entry was not sgv")
+				self.__logger.warning("Nightscout: last entry was not sgv")
 				return None
 			epoch = obj["date"]
 			timestamp = datetime.datetime.utcfromtimestamp(int(epoch//1000))

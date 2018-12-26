@@ -23,7 +23,7 @@ class DexcomReader():
 	
 	def set_config(self, __config):
 		if 'dexcom_username' not in __config.keys() or 'dexcom_password' not in __config.keys():
-			logger.error('Invalid Dexcom __config values')
+			self.__logger.error('Invalid Dexcom __config values')
 			return False
 		self.__config['username'] = __config['dexcom_username']
 		self.__config['password'] = __config['dexcom_password']
@@ -111,7 +111,7 @@ class DexcomReader():
 			self.__logger.debug(data)
 			list = json.loads(data)
 			if (len(list) == 0):
-				logger.warning("Dexcom responded with empty list")
+				self.__logger.warning("Dexcom responded with empty list")
 				return None
 			obj = list[0]
 			epochStr = re.sub('[^0-9]','', obj["WT"])
