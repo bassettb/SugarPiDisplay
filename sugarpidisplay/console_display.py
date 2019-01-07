@@ -17,20 +17,19 @@ class ConsoleDisplay:
 	def clear(self):
 		pass
 		
-	def show_centered(self,line,text):
+	def show_centered(self,line0,line1):
+		text = (line0 if line0 is not None else "") + " || " + (line1 if line1 is not None else "")
 		self.__logger.debug("Display: " + text)
 		print(text)
 
 	def update_value_time_trend(self,value,mins,trend):
 		valStr = "--"
-		trendChars = "  "
 		if (value > 0):
 			valStr = str(value)
-			#trendChars = self.__getTrendChars(trend)
 	
 		print(valStr + "   " + self.__get_trend_word(trend) + "   " + str(mins))
 		valStr = valStr.rjust(3)
-		ageStr = self.update_age(mins)	
+		self.update_age(mins)	
 		
 
 	def update_age(self, mins):

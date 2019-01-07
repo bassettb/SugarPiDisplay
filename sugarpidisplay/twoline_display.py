@@ -20,7 +20,7 @@ class TwolineDisplay:
 	def open(self):
 		addr = self.__find_device(self.__port)
 		if (addr < 1):
-			raise exception
+			raise Exception
 		self.__lcd = CharLCD(i2c_expander='PCF8574', address=addr, port=self.__port,
 				  cols=16, rows=2, dotsize=8,
 				  #charmap='A02',
@@ -51,12 +51,6 @@ class TwolineDisplay:
 		self.__lcd.clear()
 		self.__screenMode = ""
 
-	def show_centered(self,line,text):
-		self.__setScreenModeToText()
-		self.__logger.debug("Display: " + text)
-		self.__lcd.cursor_pos = (line, 0)
-		self.__lcd.write_string(text.center(16))
-
 	def show_centered(self,line0,line1):
 		self.__setScreenModeToText()
 		self.__logger.debug("Display: " + (line0 if line0 is not None else "") + " || " + (line1 if line1 is not None else ""))
@@ -85,7 +79,7 @@ class TwolineDisplay:
 		self.__lcd.cursor_pos = (1, 4)
 		self.__lcd.write_string(trendChars)
 
-		ageStr = self.update_age(mins)		
+		self.update_age(mins)		
 		
 
 	def update_age(self, mins):
