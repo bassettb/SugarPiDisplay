@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import sys
 import platform
@@ -188,7 +188,7 @@ class SugarPiApp():
 	def __updateTickers(self,ctx):
 		if ctx.LastReading is not None:
 			readingAgeMins = get_reading_age_minutes(ctx.LastReading.timestamp)
-			self.glucoseDisplay.update_age(readingAgeMins)
+			self.glucoseDisplay.update({'age': readingAgeMins})
 
 		if (self.config['use_animation']):
 			self.glucoseDisplay.updateAnimation()
@@ -254,6 +254,17 @@ class SugarPiApp():
 		self.logger.info("Successful login refresh")
 		ctx.setNextState(State.ReadValues)
 
+	def __getReadingWaitBackoff(self,readingAgeMins):
+		if (readingAgeMins >= 10):
+			return 60
+		elif (readingAgeMins >= 6):
+			return 30
+		elif (readingAgeMins >= 5):
+			return 15
+		else:
+			# We shouldn't get here.  A non-new reading should be older than 5 minutes
+			return 60
+
 	def __runReader(self,ctx):
 		ctx.IsNewState = False
 		self.__updateTickers(ctx)
@@ -269,31 +280,19 @@ class SugarPiApp():
 			return
 
 		reading = resp['reading']
-		
-		lastReading = ctx.LastReading
-		isNewReading = ((lastReading is None) or (lastReading.timestamp != reading.timestamp))
 		readingAgeMins = get_reading_age_minutes(reading.timestamp)
+		self.glucoseDisplay.update({'age':readingAgeMins})
+		if (readingAgeMins >= 20):
+			self.glucoseDisplay.update({'oldreading':True})
+		else:
+			self.glucoseDisplay.update({'value':reading.value, 'trend':reading.trend})
+
+		isNewReading = ((ctx.LastReading is None) or (ctx.LastReading.timestamp != reading.timestamp))
+		ctx.LastReading = reading
 		if (isNewReading):
-			if (readingAgeMins >= 20):
-				self.glucoseDisplay.update_value_time_trend(0, readingAgeMins, 0)
-			else:
-				self.glucoseDisplay.update_value_time_trend(reading.value, readingAgeMins, reading.trend)
-			lastReading = reading
 			ctx.setNextRunTimeAbsolute(reading.timestamp + datetime.timedelta(seconds=(self.interval_seconds+10)))
 		else:
-			if (readingAgeMins >= 20):
-				self.glucoseDisplay.update_value_time_trend(0, readingAgeMins, 0)
-				
-			if (readingAgeMins >= 10):
-				ctx.setNextRunDelaySeconds(60)
-			elif (readingAgeMins >= 6):
-				ctx.setNextRunDelaySeconds(30)
-			elif (readingAgeMins >= 5):
-				ctx.setNextRunDelaySeconds(10)
-			else:
-				# We shouldn't get here.  A non-new reading should be older than 5 minutes
-				ctx.setNextRunTimeAbsolute(lastReading.timestamp + datetime.timedelta(seconds=310))
-		ctx.LastReading = lastReading
+			ctx.setNextRunDelaySeconds(self.__getReadingWaitBackoff(readingAgeMins))
 
 
 class ExitEventHandler:

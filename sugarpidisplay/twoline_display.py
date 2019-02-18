@@ -61,28 +61,40 @@ class TwolineDisplay:
 			self.__lcd.cursor_pos = (1, 0)
 			self.__lcd.write_string(line1.center(16))
 
-	def update_value_time_trend(self,value,mins,trend):
+
+	def update(self,updates):
 		self.__setScreenModeToEgv()
+		if 'age' in updates.keys():
+			self.__update_age(updates['age'])
+		if 'oldreading' in updates.keys():
+			self.__update_value(None)
+			self.__update_trend(None)
+		if 'value' in updates.keys():
+			self.__update_value(updates['value'])
+		if 'trend' in updates.keys():
+			self.__update_trend(updates['trend'])
+
+	def __update_value(self,value):
 		valStr = "--"
-		trendChars = "  "
-		if (value > 0):
+		if (value is not None):
 			valStr = str(value)
-			trendChars = self.__get_trend_chars(trend)
-	
-		print(valStr + "   " + str(mins))
+		#print(valStr + "   " + str(mins))
 
 		valStr = valStr.replace("0","O")
 		valStr = valStr.rjust(6)
 		self.__lcd.cursor_pos = (0, 0)
 		self.__lcd.write_string(valStr)
 
+
+	def __update_trend(self, trend):
+		trendArrow = "  "
+		if trend is not None:
+			trendArrow = self.__get_trend_chars(trend)
 		self.__lcd.cursor_pos = (1, 4)
-		self.__lcd.write_string(trendChars)
+		self.__lcd.write_string(trendArrow)
 
-		self.update_age(mins)		
-		
 
-	def update_age(self, mins):
+	def __update_age(self, mins):
 		self.__setScreenModeToEgv()
 		ageStr = "now"
 		if (mins > 50):
