@@ -43,7 +43,8 @@ class SugarPiApp():
 	config = {}
 	glucoseDisplay = None
 	reader = None
-	
+	LastReading = None
+
 	def config_server_worker(self):
 		from .sugarpiconfig import app
 		HOST = '0.0.0.0'
@@ -130,39 +131,56 @@ class SugarPiApp():
 		return True
 
 	
-	class Context:
+	class StateManager:
 		__NextRunTime = None
+		__RunUntilTime = None
 		CurrentState = None
 		StateFunc = None		
-		LastReading = None
 		IsNewState = False
-		
+		__prevState = None
+
 		def setNextState(self,state):
 			self.CurrentState = state
 			self.IsNewState = True
 			self.setNextRunDelaySeconds(0)
 	
+		def preRun(self):
+			self.IsNewState = self.CurrentState != self.__prevState
+			self.__prevState = self.CurrentState
+
 		def setNextRunDelaySeconds(self,seconds):
 			self.__NextRunTime = now_plus_seconds(seconds)
-		
-		def setNextRunTimeAbsolute(self,time):
+
+		def setNextRunTimeTimestamp(self,time):
 			self.__NextRunTime = time
-			
-		def isRunTime(self):
+
+		def setNextRunTimeTimestampPlusSeconds(self,timestamp,seconds):
+			self.__NextRunTime = timestamp + datetime.timedelta(seconds=(seconds+10))
+
+		def isNextRunTime(self):
 			return (self.__NextRunTime <= datetime.datetime.utcnow())
+
+		def setRunDuration(self,seconds):
+			self.__RunUntilTime = now_plus_seconds(seconds)
+
+		def isRunDurationOver(self):
+			return (self.__RunUntilTime <= datetime.datetime.utcnow())
 
 	
 	def run(self):
-		
-		ctx = SugarPiApp.Context()
+		ctx = SugarPiApp.StateManager()
 		ctx.setNextState(State.GetWifi)
 		ctx.setNextRunDelaySeconds(0)
 		
 		self.glucoseDisplay.show_centered("Initializing", "")
 		
-		while (not self.exit_event_handler.exit_now):		
-			stateFunc = self.__getStateFunction(ctx)
-			stateFunc(ctx)
+		while (not self.exit_event_handler.exit_now):
+			if (ctx.CurrentState == State.ReadValues or ctx.CurrentState == State.ReLogin):
+				self.__updateTickers()
+			if (ctx.isNextRunTime()):
+				stateFunc = self.__getStateFunction(ctx)
+				ctx.preRun()
+				stateFunc(ctx)
 
 			# TODO - Only sleep if delay requires it
 			time.sleep(2)							
@@ -185,18 +203,16 @@ class SugarPiApp():
 			stateFunc = self.__runReader
 		return stateFunc
 		
-	def __updateTickers(self,ctx):
-		if ctx.LastReading is not None:
-			readingAgeMins = get_reading_age_minutes(ctx.LastReading.timestamp)
+	def __updateTickers(self):
+		if self.LastReading is not None:
+			readingAgeMins = get_reading_age_minutes(self.LastReading.timestamp)
 			self.glucoseDisplay.update({'age': readingAgeMins})
 
 		if (self.config['use_animation']):
 			self.glucoseDisplay.updateAnimation()
 
 	def __getWifi(self,ctx):
-		if (ctx.IsNewState):
-			self.glucoseDisplay.show_centered("Waiting", "Wifi")
-			ctx.IsNewState = False
+		self.glucoseDisplay.show_centered("Waiting", "Wifi")
 		ip = get_ip_address('wlan0')
 		if (ip == ""):
 			ctx.setNextRunDelaySeconds(1)
@@ -209,31 +225,21 @@ class SugarPiApp():
 			self.logger.info("Wifi IP: " + ip)
 			self.glucoseDisplay.show_centered(ip, "")
 			seconds = self.ip_show_seconds_pc_mode if self.__args['pc_mode'] else self.ip_show_seconds
-			ctx.setNextRunDelaySeconds(seconds)
-			ctx.IsNewState = False
+			ctx.setRunDuration(seconds)
 			return
-		if (not ctx.isRunTime()):
-			return
-		ctx.setNextState(State.LoadConfig)
-
+		if (ctx.isRunDurationOver()):
+			ctx.setNextState(State.LoadConfig)
 
 	def __runLoadConfig(self,ctx):
-		if (ctx.IsNewState):
-			self.glucoseDisplay.show_centered("Loading", "Config")
-			ctx.IsNewState = False
-		if (not ctx.isRunTime()):
-			return
+		self.glucoseDisplay.show_centered("Loading", "Config")
 		if (not self.__read_config() or not self.__get_reader()):
-			self.glucoseDisplay.show_centered("Invalid", "Config Info")
+			self.glucoseDisplay.show_centered("Invalid Config", "Will Retry")
 			ctx.setNextRunDelaySeconds(5)
 			return
 		ctx.setNextState(State.FirstLogin)
 
 	def __runFirstLogin(self,ctx):
 		self.glucoseDisplay.show_centered("Attempting", "Login")
-		ctx.IsNewState = False
-		if (not ctx.isRunTime()):
-			return
 		if (not self.reader.login()):
 			ctx.setNextRunDelaySeconds(180)
 			self.glucoseDisplay.show_centered("Login Failed", "Will Retry")
@@ -242,39 +248,21 @@ class SugarPiApp():
 		ctx.setNextState(State.ReadValues)
 
 	def __runReLogin(self,ctx):
-		ctx.IsNewState = False
-		self.__updateTickers(ctx)
-		if (not ctx.isRunTime()):
-			return
 		if (not self.reader.login()):
 			ctx.setNextState(State.FirstLogin)
-			ctx.setNextRunDelaySeconds(30)
 			self.glucoseDisplay.show_centered("Re-login Failed", "Will Retry")
 			return
 		self.logger.info("Successful login refresh")
 		ctx.setNextState(State.ReadValues)
 
-	def __getReadingWaitBackoff(self,readingAgeMins):
-		if (readingAgeMins >= 10):
-			return 60
-		elif (readingAgeMins >= 6):
-			return 30
-		elif (readingAgeMins >= 5):
-			return 15
-		else:
-			# We shouldn't get here.  A non-new reading should be older than 5 minutes
-			return 60
-
 	def __runReader(self,ctx):
-		ctx.IsNewState = False
-		self.__updateTickers(ctx)
-		if (not ctx.isRunTime()):
-			return
+		if (self.LastReading is None):
+			self.glucoseDisplay.update({'oldreading':True})
+		# todo - show something here
 		resp = self.reader.get_latest_gv()
 		if 'errorMsg' in resp.keys():
 			ctx.setNextRunDelaySeconds(120)
 			return
-
 		if 'tokenFailed' in resp.keys():
 			ctx.setNextState(State.ReLogin)
 			return
@@ -287,12 +275,23 @@ class SugarPiApp():
 		else:
 			self.glucoseDisplay.update({'value':reading.value, 'trend':reading.trend})
 
-		isNewReading = ((ctx.LastReading is None) or (ctx.LastReading.timestamp != reading.timestamp))
-		ctx.LastReading = reading
+		isNewReading = ((self.LastReading is None) or (self.LastReading.timestamp != reading.timestamp))
+		self.LastReading = reading
 		if (isNewReading):
-			ctx.setNextRunTimeAbsolute(reading.timestamp + datetime.timedelta(seconds=(self.interval_seconds+10)))
+			ctx.setNextRunTimeTimestampPlusSeconds(reading.timestamp, self.interval_seconds+10)
 		else:
 			ctx.setNextRunDelaySeconds(self.__getReadingWaitBackoff(readingAgeMins))
+
+	def __getReadingWaitBackoff(self,readingAgeMins):
+		if (readingAgeMins >= 10):
+			return 60
+		elif (readingAgeMins >= 6):
+			return 30
+		elif (readingAgeMins >= 5):
+			return 15
+		else:
+			# We shouldn't get here.  A non-new reading should be older than 5 minutes
+			return 60
 
 
 class ExitEventHandler:
