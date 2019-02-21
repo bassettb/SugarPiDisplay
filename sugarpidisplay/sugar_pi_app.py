@@ -134,19 +134,23 @@ class SugarPiApp():
 	class StateManager:
 		__NextRunTime = None
 		__RunUntilTime = None
+		__stateChangedFlag = False
 		CurrentState = None
+		PreviousState = None
 		StateFunc = None		
 		IsNewState = False
-		__prevState = None
 
 		def setNextState(self,state):
+			self.PreviousState = self.CurrentState
 			self.CurrentState = state
-			self.IsNewState = True
+			self.__stateChangedFlag = True
 			self.setNextRunDelaySeconds(0)
 	
 		def preRun(self):
-			self.IsNewState = self.CurrentState != self.__prevState
-			self.__prevState = self.CurrentState
+			self.IsNewState = False
+			if(self.__stateChangedFlag):
+				self.IsNewState = True
+				self.__stateChangedFlag = False
 
 		def setNextRunDelaySeconds(self,seconds):
 			self.__NextRunTime = now_plus_seconds(seconds)
@@ -256,9 +260,9 @@ class SugarPiApp():
 		ctx.setNextState(State.ReadValues)
 
 	def __runReader(self,ctx):
-		if (self.LastReading is None):
+		if (ctx.IsNewState and ctx.PreviousState == State.FirstLogin):
 			self.glucoseDisplay.update({'oldreading':True})
-		# todo - show something here
+
 		resp = self.reader.get_latest_gv()
 		if 'errorMsg' in resp.keys():
 			ctx.setNextRunDelaySeconds(120)
