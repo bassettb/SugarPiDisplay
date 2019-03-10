@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='sugarpidisplay',
-    version='0.8',
+    version='0.9',
     description='Display your CGM data on a tiny LCD screen',
     url='https://github.com/bassettb/SugarPiDisplay',
     author='Bryan Bassett',
