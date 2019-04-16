@@ -1,0 +1,1 @@
+*/10 * * * * root /home/pi/SugarPiDisplay/network-check.sh
