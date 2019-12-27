@@ -5,11 +5,11 @@ import json
 from .utils import *
 from .trend import Trend
 
-host = "share1.dexcom.com"
+host = "share2.dexcom.com"
 login_resource = "/ShareWebServices/Services/General/LoginPublisherAccountByName"
 latestgv_resource = "/ShareWebServices/Services/Publisher/ReadPublisherLatestGlucoseValues"
 user_agent = "Dexcom Share/3.0.2.11 CFNetwork/711.2.23 Darwin/14.0.0"
-dex_applicationId = "d8665ade-9673-4e27-9ff6-92db4ce13d13"
+dex_applicationId = "05D6B4A1-5C22-4B17-929B-5913F2186EAB"
 
 class DexcomReader():
 
