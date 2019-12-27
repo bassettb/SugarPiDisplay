@@ -159,7 +159,7 @@ class SugarPiApp():
 			self.__NextRunTime = time
 
 		def setNextRunTimeTimestampPlusSeconds(self,timestamp,seconds):
-			self.__NextRunTime = timestamp + datetime.timedelta(seconds=(seconds+10))
+			self.__NextRunTime = timestamp + datetime.timedelta(seconds=seconds)
 
 		def isNextRunTime(self):
 			return (self.__NextRunTime <= datetime.datetime.utcnow())
