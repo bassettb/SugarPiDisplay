@@ -37,7 +37,7 @@ class SugarPiApp():
 	interval_seconds = 300
 	ip_show_seconds = 6
 	ip_show_seconds_pc_mode = 2
-	__args = {'debug_mode': False, 'pc_mode': False }
+	__args = {'debug_mode': False, 'pc_mode': False}
 
 	logger = None
 	config = {}
@@ -78,12 +78,10 @@ class SugarPiApp():
 		self.glucoseDisplay.clear()
 
 	def __parse_args(self):
-		if (len(sys.argv) > 1 and sys.argv[1] == "debug"):
+		if ("debug" in sys.argv):
 			self.__args['debug_mode'] = True
-
-		if (len(sys.argv) > 1 and sys.argv[1] == "pc"):
+		if ("pc" in sys.argv):
 			self.__args['pc_mode'] = True
-
 		
 	def __init_logger(self):
 		self.logger = logging.getLogger(__name__)
@@ -273,11 +271,10 @@ class SugarPiApp():
 
 		reading = resp['reading']
 		readingAgeMins = get_reading_age_minutes(reading.timestamp)
-		self.glucoseDisplay.update({'age':readingAgeMins})
 		if (readingAgeMins >= 20):
-			self.glucoseDisplay.update({'oldreading':True})
+			self.glucoseDisplay.update({'age':readingAgeMins, 'value':reading.value, 'trend':reading.trend, 'oldreading':True})
 		else:
-			self.glucoseDisplay.update({'value':reading.value, 'trend':reading.trend})
+			self.glucoseDisplay.update({'age':readingAgeMins, 'value':reading.value, 'trend':reading.trend})
 
 		isNewReading = ((self.LastReading is None) or (self.LastReading.timestamp != reading.timestamp))
 		self.LastReading = reading

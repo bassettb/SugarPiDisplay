@@ -69,6 +69,7 @@ class TwolineDisplay:
 		if 'oldreading' in updates.keys():
 			self.__update_value(None)
 			self.__update_trend(None)
+			return
 		if 'value' in updates.keys():
 			self.__update_value(updates['value'])
 		if 'trend' in updates.keys():
