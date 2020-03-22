@@ -17,7 +17,7 @@ LOG_FILENAME="sugarpidisplay.log"
 folder_name = '.sugarpidisplay'
 config_file = 'config.json'
 pi_sugar_path = os.path.join(str(Path.home()), folder_name)
-Path(pi_sugar_path).mkdir(exist_ok=True) 
+Path(pi_sugar_path).mkdir(exist_ok=True)
 
 def dexcom_field_check(form, field):
     if (form.data_source.data == source_dexcom):
@@ -98,10 +98,9 @@ def loadData(form):
                     form.dexcom_pass.data = config['dexcom_password']
             if (config['data_source'] == source_nightscout):
                 if ('nightscout_url' in config):
-                    form.ns_url.data = config['nightscout_url'] 
+                    form.ns_url.data = config['nightscout_url']
                 if ('nightscout_access_token' in config):
                     form.ns_token.data = config['nightscout_access_token']
         form.use_animation.data = config['use_animation']
     except:
         pass
-

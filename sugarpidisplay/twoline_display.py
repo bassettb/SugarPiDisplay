@@ -2,10 +2,7 @@ import smbus
 from RPLCD.i2c import CharLCD
 from .trend import Trend
 
-
-
 class TwolineDisplay:
-
 	__lcd = None
 	__animIdx = -1
 	__animChars = []
@@ -61,7 +58,6 @@ class TwolineDisplay:
 			self.__lcd.cursor_pos = (1, 0)
 			self.__lcd.write_string(line1.center(16))
 
-
 	def update(self,updates):
 		self.__setScreenModeToEgv()
 		if 'age' in updates.keys():
@@ -105,10 +101,10 @@ class TwolineDisplay:
 
 		ageStr = ageStr.replace("0","O")
 		ageStr = ageStr.rjust(3)
-		
+
 		self.__lcd.cursor_pos = (1, 13)
 		self.__lcd.write_string(ageStr)
-		
+
 
 	def updateAnimation(self):
 		self.__setScreenModeToEgv()
@@ -118,19 +114,19 @@ class TwolineDisplay:
 		char = self.__animChars[self.__animIdx]
 		self.__lcd.cursor_pos = (0, 15)
 		self.__lcd.write_string(char)
-		
+
 	def __setScreenModeToEgv(self):
 		if (not self.__screenMode == "egv"):
 			self.__logger.debug("Display mode EGV")
 			self.__screenMode = "egv"
 			self.__lcd.clear()
-			
+
 	def __setScreenModeToText(self):
 		if (not self.__screenMode == "text"):
 			self.__logger.debug("Display mode Text")
 			self.__screenMode = "text"
 			self.__lcd.clear()
-		
+
 	def __get_trend_chars(self,trend):
 		if(trend == Trend.NONE):
 			return "**"
@@ -204,7 +200,7 @@ class TwolineDisplay:
 		)
 		self.__lcd.create_char(4, dnArrow)
 
-		
+
 		self.__animChars = [ '\x05', '\x06', '\x07' ]
 
 		anim1 = (
@@ -218,7 +214,7 @@ class TwolineDisplay:
 			 0b00000
 		)
 		self.__lcd.create_char(5, anim1)
-		
+
 		anim2 = (
 			 0b00000,
 			 0b00000,
@@ -230,7 +226,7 @@ class TwolineDisplay:
 			 0b00000
 		)
 		self.__lcd.create_char(6, anim2)
-		
+
 		anim3 = (
 			 0b01100,
 			 0b10010,

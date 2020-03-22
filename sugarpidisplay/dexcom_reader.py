@@ -13,14 +13,13 @@ dex_applicationId = "05D6B4A1-5C22-4B17-929B-5913F2186EAB"
 
 class DexcomReader():
 
-		
 	__logger = None
 	__sessionId = ""
 	__config = {}
-	
+
 	def __init__(self, logger):
 		self.__logger = logger
-	
+
 	def set_config(self, __config):
 		if 'dexcom_username' not in __config.keys() or 'dexcom_password' not in __config.keys():
 			self.__logger.error('Invalid Dexcom __config values')
@@ -28,7 +27,7 @@ class DexcomReader():
 		self.__config['username'] = __config['dexcom_username']
 		self.__config['password'] = __config['dexcom_password']
 		return True
-	
+
 	def login(self):
 		self.__sessionId = ""
 		try:
@@ -62,7 +61,7 @@ class DexcomReader():
 			'applicationId': dex_applicationId
 			}
 		return json.dumps(loginObj)
-			
+
 	def get_latest_gv(self):
 		result = self.__make_request()
 		if (self.__check_session_expire(result)):
@@ -124,7 +123,7 @@ class DexcomReader():
 			if(timestamp > datetime.datetime.utcnow()):
 				timestamp = datetime.datetime.utcnow()
 				self.__logger.warning("Corrected timestamp to now")
-				
+
 			reading = Reading()
 			reading.timestamp = timestamp
 			reading.value = value
@@ -133,7 +132,7 @@ class DexcomReader():
 		except Exception as e:
 			self.__logger.error('Exception during parse ' + str(e))
 			return None
-			
+
 	def __check_session_expire(self, result):
         # Returns 200 with "SessionNotValid" if expired sessionId
         # Returns 500 with "SessionIdNotFound" if unknown sessionId

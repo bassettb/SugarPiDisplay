@@ -57,16 +57,16 @@ class SugarPiApp():
 
 	def initialize(self):
 		self.exit_event_handler = ExitEventHandler()
-		
+
 		self.__parse_args()
 
-		Path(self.pi_sugar_path).mkdir(exist_ok=True) 
-		
+		Path(self.pi_sugar_path).mkdir(exist_ok=True)
+
 		self.__init_logger()
 		self.logger.info("Application Start")
-		
+
 		self.start_config_server()
-		
+
 		#self.logger.info(platform.python_version())
 		if (self.__args['pc_mode']):
 			from .console_display import ConsoleDisplay
@@ -82,7 +82,7 @@ class SugarPiApp():
 			self.__args['debug_mode'] = True
 		if ("pc" in sys.argv):
 			self.__args['pc_mode'] = True
-		
+
 	def __init_logger(self):
 		self.logger = logging.getLogger(__name__)
 		self.logger.setLevel(logging.INFO)
@@ -92,7 +92,7 @@ class SugarPiApp():
 		if (self.__args['debug_mode']):
 			self.logger.setLevel(logging.DEBUG)
 			handler.setLevel(logging.DEBUG)
-			
+
 		formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 		handler.setFormatter(formatter)
 		self.logger.addHandler(handler)
@@ -128,14 +128,14 @@ class SugarPiApp():
 		self.logger.info("Loaded config")
 		return True
 
-	
+
 	class StateManager:
 		__NextRunTime = None
 		__RunUntilTime = None
 		__stateChangedFlag = False
 		CurrentState = None
 		PreviousState = None
-		StateFunc = None		
+		StateFunc = None
 		IsNewState = False
 
 		def setNextState(self,state):
@@ -143,7 +143,7 @@ class SugarPiApp():
 			self.CurrentState = state
 			self.__stateChangedFlag = True
 			self.setNextRunDelaySeconds(0)
-	
+
 		def preRun(self):
 			self.IsNewState = False
 			if(self.__stateChangedFlag):
@@ -168,14 +168,14 @@ class SugarPiApp():
 		def isRunDurationOver(self):
 			return (self.__RunUntilTime <= datetime.datetime.utcnow())
 
-	
+
 	def run(self):
 		ctx = SugarPiApp.StateManager()
 		ctx.setNextState(State.GetWifi)
 		ctx.setNextRunDelaySeconds(0)
-		
+
 		self.glucoseDisplay.show_centered("Initializing", "")
-		
+
 		while (not self.exit_event_handler.exit_now):
 			if (ctx.CurrentState == State.ReadValues or ctx.CurrentState == State.ReLogin):
 				self.__updateTickers()
@@ -185,11 +185,11 @@ class SugarPiApp():
 				stateFunc(ctx)
 
 			# TODO - Only sleep if delay requires it
-			time.sleep(2)							
-					
+			time.sleep(2)
+
 		print("Exiting SugarPiDisplay")
 		self.glucoseDisplay.close()
-	
+
 	def __getStateFunction(self,ctx):
 		if (ctx.CurrentState == State.GetWifi):
 			stateFunc = self.__getWifi
@@ -204,7 +204,7 @@ class SugarPiApp():
 		elif (ctx.CurrentState == State.ReadValues):
 			stateFunc = self.__runReader
 		return stateFunc
-		
+
 	def __updateTickers(self):
 		if self.LastReading is not None:
 			readingAgeMins = get_reading_age_minutes(self.LastReading.timestamp)
@@ -220,7 +220,7 @@ class SugarPiApp():
 			ctx.setNextRunDelaySeconds(1)
 		else:
 			ctx.setNextState(State.ShowWifi)
-			
+
 	def __showWifi(self,ctx):
 		if (ctx.IsNewState):
 			ip = get_ip_address('wlan0')
@@ -303,6 +303,3 @@ class ExitEventHandler:
 
 	def handle_exit_signal(self,signum, frame):
 		self.exit_now = True
-
-
-

@@ -7,16 +7,16 @@ class ConsoleDisplay:
 	def __init__(self, logger):
 		self.__logger = logger
 		return None
-	
+
 	def open(self):
 		return True
-		
+
 	def close(self):
 		return True
-	
+
 	def clear(self):
 		pass
-		
+
 	def show_centered(self,line0,line1):
 		text = (line0 if line0 is not None else "") + " || " + (line1 if line1 is not None else "")
 		self.__logger.debug("Display: " + text)
@@ -26,11 +26,11 @@ class ConsoleDisplay:
 		valStr = "--"
 		if (value > 0):
 			valStr = str(value)
-	
+
 		print(valStr + "   " + self.__get_trend_word(trend) + "   " + str(mins))
 		valStr = valStr.rjust(3)
-		self.update_age(mins)	
-		
+		self.update_age(mins)
+
 
 	def update_age(self, mins):
 		ageStr = "now"

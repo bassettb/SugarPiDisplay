@@ -10,5 +10,3 @@ class Trend(Enum):
 	DoubleDown = 7
 	NotComputable = 8
 	RateOutOfRange = 9
-
-	

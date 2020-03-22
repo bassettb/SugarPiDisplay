@@ -8,16 +8,14 @@ from .trend import Trend
 ns_login_resource = "/api/v2/authorization/request"
 ns_latestgv_resource = "/api/v1/entries/current"
 
-
 class NightscoutReader():
-		
 	__logger = None
 	__token = ""
 	__config = {}
-	
+
 	def __init__(self, logger):
 		self.__logger = logger
-	
+
 	def set_config(self, config):
 		self.__config.clear()
 		if 'nightscout_url' not in config.keys() or 'nightscout_access_token' not in config.keys():
@@ -26,7 +24,7 @@ class NightscoutReader():
 		self.__config['url'] = config['nightscout_url']
 		self.__config['accessToken'] = config['nightscout_access_token']
 		return True
-	
+
 	def login(self):
 		self.__sessionId = ""
 		try:
@@ -40,7 +38,7 @@ class NightscoutReader():
 				return False
 			respStr = resp.read().decode("utf-8")
 			#print(respStr.decode("utf-8"))
-			
+
 			respObj = json.loads(respStr)
 			self.__token = respObj['token']
 			self.__logger.debug(self.__token)
@@ -123,12 +121,12 @@ class NightscoutReader():
 		except Exception as e:
 			self.__logger.error('Exception during parse ' + str(e))
 			return None
-			
+
 	def __check_session_expire(self, result):
 		if (result['status'] == 401):
 			return True
 		return False
-		
+
 	def __get_connection(self):
 		url = self.__config['url'].lower()
 		if (url.startswith('http://')):
@@ -139,7 +137,7 @@ class NightscoutReader():
 			return http.client.HTTPSConnection(url)
 		else:
 			return http.client.HTTPConnection(url)
-	
+
 	def __translateTrend(self, trendStr):
 		if(trendStr == "DoubleUp"):
 			return Trend.DoubleUp
