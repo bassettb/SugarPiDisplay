@@ -1,5 +1,5 @@
 import http.client
-import datetime
+from datetime import datetime,timezone
 import re
 import json
 from .utils import *
@@ -103,14 +103,15 @@ class NightscoutReader():
 				self.__logger.warning("Nightscout: last entry was not sgv")
 				return None
 			epoch = obj["date"]
-			timestamp = datetime.datetime.utcfromtimestamp(int(epoch//1000))
+			timestamp = datetime.fromtimestamp(int(epoch//1000), timezone.utc)
 			minutes_old = get_reading_age_minutes(timestamp)
 			value = obj["sgv"]
 			trend = self.__translateTrend(obj["direction"])
 			# Change this loglevel to INFO if you want each reading logged
 			self.__logger.debug("parsed: " + str(timestamp) + "   " + str(value) + "   " + str(trend) + "   " + str(minutes_old) + " mins" )
-			if(timestamp > datetime.datetime.utcnow()):
-				timestamp = datetime.datetime.utcnow()
+			utcnow = datetime.now(timezone.utc)
+			if(timestamp > utcnow):
+				timestamp = utcnow
 				self.__logger.warning("Corrected timestamp to now")
 
 			reading = Reading()

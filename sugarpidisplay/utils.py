@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime,timezone,timedelta
 import time
 
 try:
@@ -21,12 +21,12 @@ except:
 		return "No IP on PC"
 
 def get_reading_age_minutes(timestamp):
-	delta = datetime.datetime.utcnow() - timestamp
+	delta = datetime.now(timezone.utc) - timestamp
 	minutes_old = int(delta.total_seconds() / 60)
 	return minutes_old
 
 def now_plus_seconds(seconds):
-	return datetime.datetime.utcnow() + datetime.timedelta(seconds=seconds)
+	return datetime.now(timezone.utc) + timedelta(seconds=seconds)
 
 class Reading():
 	timestamp = None

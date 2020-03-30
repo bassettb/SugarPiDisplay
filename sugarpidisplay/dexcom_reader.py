@@ -1,5 +1,5 @@
 import http.client
-import datetime
+from datetime import datetime,timezone
 import re
 import json
 from .utils import *
@@ -114,14 +114,15 @@ class DexcomReader():
 				return None
 			obj = list[0]
 			epochStr = re.sub('[^0-9]','', obj["WT"])
-			timestamp = datetime.datetime.utcfromtimestamp(int(epochStr)//1000)
+			timestamp = datetime.fromtimestamp(int(epochStr)//1000, timezone.utc)
 			minutes_old = get_reading_age_minutes(timestamp)
 			value = obj["Value"]
 			trend = self.__translateTrend(obj["Trend"])
 			# Change this loglevel to INFO if you want each reading logged
 			self.__logger.debug("parsed: " + str(timestamp) + "   " + str(value) + "   " + str(trend) + "   " + str(minutes_old) + " mins" )
-			if(timestamp > datetime.datetime.utcnow()):
-				timestamp = datetime.datetime.utcnow()
+			utcnow = datetime.now(timezone.utc)
+			if(timestamp > utcnow):
+				timestamp = utcnow
 				self.__logger.warning("Corrected timestamp to now")
 
 			reading = Reading()

@@ -5,7 +5,7 @@ import platform
 import signal
 import threading
 import http.client
-import datetime
+from datetime import datetime,timezone,timedelta
 import time
 from enum import Enum
 
@@ -157,16 +157,16 @@ class SugarPiApp():
 			self.__NextRunTime = time
 
 		def setNextRunTimeTimestampPlusSeconds(self,timestamp,seconds):
-			self.__NextRunTime = timestamp + datetime.timedelta(seconds=seconds)
+			self.__NextRunTime = timestamp + timedelta(seconds=seconds)
 
 		def isNextRunTime(self):
-			return (self.__NextRunTime <= datetime.datetime.utcnow())
+			return (self.__NextRunTime <= datetime.now(timezone.utc))
 
 		def setRunDuration(self,seconds):
 			self.__RunUntilTime = now_plus_seconds(seconds)
 
 		def isRunDurationOver(self):
-			return (self.__RunUntilTime <= datetime.datetime.utcnow())
+			return (self.__RunUntilTime <= datetime.now(timezone.utc))
 
 
 	def run(self):
