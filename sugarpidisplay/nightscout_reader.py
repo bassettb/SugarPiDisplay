@@ -2,7 +2,7 @@ import http.client
 from datetime import datetime,timezone
 import re
 import json
-from .utils import *
+from .utils import Reading,get_reading_age_minutes
 from .trend import Trend
 
 ns_login_resource = "/api/v2/authorization/request"

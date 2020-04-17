@@ -14,7 +14,7 @@ from logging.handlers import RotatingFileHandler
 import json
 from pathlib import Path
 
-from .utils import *
+from .utils import Reading,get_reading_age_minutes,now_plus_seconds,get_ip_address
 from .config_utils import *
 from .nightscout_reader import NightscoutReader
 from .dexcom_reader import DexcomReader
