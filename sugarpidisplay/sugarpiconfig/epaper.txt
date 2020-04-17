@@ -1,0 +1,15 @@
+
+Use log levels for banner text.  Only show INFO and above
+keep list of all banner updates in last 10 minutes
+  if exceeds 10, put up banner "Too many messages"
+
+
+
+
+update time with every draw: "at 12:00p"
+
+if value or trend changed, update the display.
+
+if 6 minutes with no update, show 5+ minute indication ?
+
+if 15 minutes with no update, show the stale value, no trend

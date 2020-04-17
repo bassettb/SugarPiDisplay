@@ -88,7 +88,7 @@ class DexcomReader():
 				'Content-Length':'0',
 				'User-Agent': user_agent
 			}
-			resource = latestgv_resource + "?minutes=1440&maxCount=1&sessionID=" + str(self.__sessionId)
+			resource = latestgv_resource + "?minutes=1440&maxCount=12&sessionID=" + str(self.__sessionId)
 
 			conn.request("POST", resource, headers=headers)
 			resp = conn.getresponse()

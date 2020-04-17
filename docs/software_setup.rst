@@ -11,6 +11,7 @@ Configuring Raspberry Pi
 - configure wifi (including country)
 - enable ssh   # this is optional
 - enable i2c
+- enable SPI   # needed for epaper only
 - set localization (timezone, language, keyboard.  The default GB keyboard layout will be a problem if your wifi password has any symbols)
 
 Once Wifi and SSH are configured, you can reboot and connect to it using SSH for the rest of the setup. 
@@ -24,6 +25,17 @@ Installing Dependencies
 ``sudo apt-get install python3-smbus``
 
 ``sudo apt-get install git``
+
+For WaveShare E-Paper display
+=============================
+sudo apt-get install python3-pil
+sudo apt-get install python3-numpy
+sudo pip3 install RPi.GPIO
+sudo pip3 install spidev
+
+``sudo apt-get install libopenjp2-7``
+
+``sudo apt-get install libtiff5``
 
 
 Installing SugarPiDisplay

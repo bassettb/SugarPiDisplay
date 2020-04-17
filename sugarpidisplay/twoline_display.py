@@ -48,7 +48,7 @@ class TwolineDisplay:
 		self.__lcd.clear()
 		self.__screenMode = ""
 
-	def show_centered(self,line0,line1):
+	def show_centered(self,logLevel,line0,line1):
 		self.__setScreenModeToText()
 		self.__logger.debug("Display: " + (line0 if line0 is not None else "") + " || " + (line1 if line1 is not None else ""))
 		if (line0 is not None):
@@ -62,7 +62,7 @@ class TwolineDisplay:
 		self.__setScreenModeToEgv()
 		if 'age' in updates.keys():
 			self.__update_age(updates['age'])
-		if 'oldreading' in updates.keys():
+		if 'oldReading' in updates.keys() and updates['oldReading']:
 			self.__update_value(None)
 			self.__update_trend(None)
 			return
