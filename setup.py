@@ -11,11 +11,12 @@ setup(
     install_requires=[
         'Flask',
         'Flask-WTF',
-        'RPLCD',
         'Pillow',
         'spidev',
-        'smbus',
         'RPi.GPIO'
+        # only for 2-line display
+        # 'smbus', 
+        # 'RPLCD'
     ],
     zip_safe=False
 )

@@ -58,8 +58,6 @@ def drawXYDot(draw, xy):
     draw.line(((xP-2,yP),(xP+2,yP)), fill = 0, width=3)
     draw.line(((xP,yP-2),(xP,yP+2)), fill = 0, width=3)
 
-
-
 def translateBgToY(y):
     valHeight = maxBgVal - minBgVal
     pixelHeight = gH - topMargin - botMargin
@@ -98,22 +96,8 @@ def drawGraph(draw, readings):
     for xy in xyArray:
         drawXYDot(draw, xy)
 
-
 def testDrawGraph(readings):
     graphImg = Image.new('1', (gW, gH), 255)
     draw = ImageDraw.Draw(graphImg)
     drawGraph(draw, readings)
     graphImg.save("/Users/bryan/graph.png","PNG")
-
-
-# values = [
-#     (0,100),
-#     (-5,120),
-#     (-10,140),
-#     (-15,150),
-#     (-20,180),
-#     (-25,240),
-#     (-30,300),
-#     (-35,350)
-# ]
-# drawGraph(values)

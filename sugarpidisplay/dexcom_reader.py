@@ -112,6 +112,7 @@ class DexcomReader():
 			if (len(list) == 0):
 				self.__logger.warning("Dexcom responded with empty list")
 				return None
+			# TODO - refactor to read all 12 readings
 			obj = list[0]
 			epochStr = re.sub('[^0-9]','', obj["WT"])
 			timestamp = datetime.fromtimestamp(int(epochStr)//1000, timezone.utc)
