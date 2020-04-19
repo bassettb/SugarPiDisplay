@@ -2,7 +2,7 @@
 
 Display your CGM data on an e-paper display anywhere in your home or office.  
 
-![SugarPiDisplay](https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/image2.jpg)![SugarPiDisplay](https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/image3.jpg)
+![SugarPiDisplay](https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/image2.jpg) .... ![SugarPiDisplay](https://raw.githubusercontent.com/bassettb/SugarPiDisplay/master/docs/image3.jpg)
 
 ## Features
 - Connects to either Dexcom Share or Nightscout.
