@@ -6,7 +6,7 @@ from .utils import Reading,get_reading_age_minutes
 from .trend import Trend
 
 ns_login_resource = "/api/v2/authorization/request"
-ns_latestgv_resource = "/api/v1/entries/current"
+ns_latestgv_resource = "/api/v1/entries/sgv?count=12"
 
 class NightscoutReader():
 	__logger = None
@@ -98,30 +98,36 @@ class NightscoutReader():
 			if (len(list) == 0):
 				self.__logger.warning("Nightscout responded with empty list")
 				return None
-			obj = list[0]
-			if (obj["type"] != 'sgv'):
-				self.__logger.warning("Nightscout: last entry was not sgv")
-				return None
-			epoch = obj["date"]
-			timestamp = datetime.fromtimestamp(int(epoch//1000), timezone.utc)
-			minutes_old = get_reading_age_minutes(timestamp)
-			value = obj["sgv"]
-			trend = self.__translateTrend(obj["direction"])
-			# Change this loglevel to INFO if you want each reading logged
-			self.__logger.debug("parsed: " + str(timestamp) + "   " + str(value) + "   " + str(trend) + "   " + str(minutes_old) + " mins" )
-			utcnow = datetime.now(timezone.utc)
-			if(timestamp > utcnow):
-				timestamp = utcnow
-				self.__logger.warning("Corrected timestamp to now")
 
-			reading = Reading()
-			reading.timestamp = timestamp
-			reading.value = value
-			reading.trend = trend
-			return reading
+			readings = []
+			for obj in list:
+				result = self.__readingFromJson(obj)
+				if result is not None:
+					readings.append(result)
+			return readings
+
 		except Exception as e:
 			self.__logger.error('Exception during parse ' + str(e))
 			return None
+
+	def __readingFromJson(self,obj):
+		if (obj["type"] != 'sgv'):
+			self.__logger.warning("Nightscout: entry was not sgv")
+			return None
+		epoch = obj["date"]
+		timestamp = datetime.fromtimestamp(int(epoch//1000), timezone.utc)
+		minutes_old = get_reading_age_minutes(timestamp)
+		value = obj["sgv"]
+		trend = self.__translateTrend(obj["direction"])
+		# Change this loglevel to INFO if you want each reading logged
+		self.__logger.debug("parsed: " + str(timestamp) + "   " + str(value) + "   " + str(trend) + "   " + str(minutes_old) + " mins" )
+		utcnow = datetime.now(timezone.utc)
+		if(timestamp > utcnow):
+			timestamp = utcnow
+			self.__logger.warning("Corrected timestamp to now")
+
+		reading = Reading(timestamp, value, trend)
+		return reading
 
 	def __check_session_expire(self, result):
 		if (result['status'] == 401):

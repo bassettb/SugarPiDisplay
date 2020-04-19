@@ -32,3 +32,8 @@ class Reading():
 	timestamp = None
 	value = 0
 	trend = 0
+
+	def __init__(self, timestamp, value, trend):
+		self.timestamp = timestamp
+		self.value = value
+		self.trend = trend
