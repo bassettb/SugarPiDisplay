@@ -2,18 +2,19 @@
 ## Software Setup
 
 ### Install Raspian OS
-Flash the microSD with Raspian-Lite
+- Flash the microSD with Raspian-Lite
+- If possible, follow the steps for a [headless config](https://www.raspberrypi.org/documentation/configuration/wireless/headless.md), which involves placing a ``wpa_supplicat.conf`` file and a file named ``ssh`` in the root of the flashed SDCard.  
+- Place the microSD in the Pi and power it on
 
 
 ### Configuring Raspberry Pi
+- If you did the headless config, you can log into your home router and find the Pi's IP address and ssh to it: eg ``ssh pi@192.168.1.202``.  Otherwise, connect a keyboard and screen until ssh is enabled.
 - ``sudo apt-get update && sudo apt-get upgrade``
 - ``sudo raspi-config``
-  - configure wifi (including country)
-  - enable ssh   # this is optional
-  - enable SPI   # needed for e-paper display only
+  - configure wifi, including country (if you did do headless config)
+  - enable ssh (if you didn't do headless config)
+  - enable SPI
   - set localization (timezone, language, keyboard.  The default GB keyboard layout will be a problem if your wifi password has any symbols)
-
-After Wifi and SSH are configured, you can reboot and connect to it using SSH for the rest of the setup. 
 
 ### Installing Dependencies
 - ``sudo apt-get install python3-pip``
