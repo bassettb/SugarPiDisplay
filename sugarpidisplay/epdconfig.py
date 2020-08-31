@@ -27,6 +27,11 @@
 # THE SOFTWARE.
 #
 
+# Downloaded from:
+# https://github.com/waveshare/e-Paper/tree/master/RaspberryPi%26JetsonNano/python/lib/waveshare_epd
+# removed JetsonNano class and set implementation = RaspberryPi
+# delay SPI.open until module_init
+
 import os
 import logging
 import sys

@@ -29,6 +29,7 @@
 
 # Downloaded from:
 # https://github.com/waveshare/e-Paper/tree/master/RaspberryPi%26JetsonNano/python/lib/waveshare_epd
+# removed import of numpy
 
 import logging
 from . import epdconfig
@@ -304,6 +305,10 @@ class EPD:
         self.TurnOnDisplay()
 
     def sleep(self):
+        self.send_command(0x22) #POWER OFF
+        self.send_data(0xC3)
+        self.send_command(0x20)
+
         self.send_command(0x10) #enter deep sleep
         self.send_data(0x01)
         epdconfig.delay_ms(100)
