@@ -30,6 +30,7 @@
 # Downloaded from:
 # https://github.com/waveshare/e-Paper/tree/master/RaspberryPi%26JetsonNano/python/lib/waveshare_epd
 # removed import of numpy
+# ignore Waveshare's Dev_exit "hack"
 
 import logging
 from . import epdconfig
@@ -312,8 +313,6 @@ class EPD:
         self.send_command(0x10) #enter deep sleep
         self.send_data(0x01)
         epdconfig.delay_ms(100)
-
-    def Dev_exit(self):
         epdconfig.module_exit()
 
 ### END OF FILE ###
