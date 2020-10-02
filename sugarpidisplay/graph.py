@@ -100,4 +100,4 @@ def testDrawGraph(readings):
     graphImg = Image.new('1', (gW, gH), 255)
     draw = ImageDraw.Draw(graphImg)
     drawGraph(draw, readings)
-    graphImg.save("/Users/bryan/graph.png","PNG")
+    graphImg.save("")

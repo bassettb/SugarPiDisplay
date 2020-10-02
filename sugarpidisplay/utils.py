@@ -28,6 +28,11 @@ def get_reading_age_minutes(timestamp):
 def now_plus_seconds(seconds):
 	return datetime.now(timezone.utc) + timedelta(seconds=seconds)
 
+def seconds_since(x):
+	delta = datetime.now(timezone.utc) - x
+	return int(delta.total_seconds())
+
+
 class Reading():
 	timestamp = None
 	value = 0

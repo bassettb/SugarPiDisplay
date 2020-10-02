@@ -37,7 +37,7 @@ class SugarPiApp():
 	interval_seconds = 300
 	ip_show_seconds = 4
 	ip_show_seconds_pc_mode = 2
-	oldReadingMinutes = 20
+	staleMinutes = 20
 	__args = {'debug_mode': False, 'pc_mode': False, 'epaper': False}
 
 	logger = None
@@ -217,8 +217,8 @@ class SugarPiApp():
 	def __updateTickers(self):
 		if self.LastReading is not None:
 			readingAgeMins = get_reading_age_minutes(self.LastReading.timestamp)
-			oldReading = readingAgeMins >= self.oldReadingMinutes
-			self.glucoseDisplay.update({'age':readingAgeMins, 'value':self.LastReading.value, 'trend':self.LastReading.trend, 'time':self.LastReading.timestamp, 'oldReading':oldReading})
+			isStaleReading = readingAgeMins >= self.staleMinutes
+			self.glucoseDisplay.update({'age':readingAgeMins, 'value':self.LastReading.value, 'trend':self.LastReading.trend, 'time':self.LastReading.timestamp, 'oldReading':isStaleReading})
 
 		if (self.config['use_animation']):
 			self.glucoseDisplay.updateAnimation()
@@ -276,14 +276,14 @@ class SugarPiApp():
 			ctx.setNextState(State.ReLogin)
 			return
 
-		readings = resp['reading']
+		readings = resp['readings']
 		reading = readings[0]
 		readingAgeMins = get_reading_age_minutes(reading.timestamp)
-		oldReading = readingAgeMins >= self.oldReadingMinutes
+		isStaleReading = readingAgeMins >= self.staleMinutes
 		self.glucoseDisplay.update(
 			{'age':readingAgeMins, 'value':reading.value,
 			'trend':reading.trend, 'time':reading.timestamp,
-			'oldReading':oldReading, 'readings': readings})
+			'oldReading':isStaleReading, 'readings': readings})
 
 		isNewReading = ((self.LastReading is None) or (self.LastReading.timestamp != reading.timestamp))
 		self.LastReading = reading

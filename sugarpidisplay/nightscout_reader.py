@@ -57,10 +57,10 @@ class NightscoutReader():
 			self.__logger.warning ("Response during get_latest_gv was " + str(result['status']))
 			return {'errorMsg' : "HTTP " + str(result['status'])}
 
-		reading = self.__parse_gv(result['content'])
-		if (reading is None):
+		readings = self.__parse_gv(result['content'])
+		if (readings is None):
 			return {'errorMsg' : 'Bad Resp'}
-		return { 'reading' : reading }
+		return { 'readings' : readings }
 
 	def __make_request(self):
 		result = { 'status': 0, 'content': '', 'error': None}
@@ -101,7 +101,7 @@ class NightscoutReader():
 
 			readings = []
 			for obj in list:
-				result = self.__readingFromJson(obj)
+				result = self.__readingFromReturnedObject(obj)
 				if result is not None:
 					readings.append(result)
 			return readings
@@ -110,7 +110,7 @@ class NightscoutReader():
 			self.__logger.error('Exception during parse ' + str(e))
 			return None
 
-	def __readingFromJson(self,obj):
+	def __readingFromReturnedObject(self,obj):
 		if (obj["type"] != 'sgv'):
 			self.__logger.warning("Nightscout: entry was not sgv")
 			return None
@@ -126,8 +126,7 @@ class NightscoutReader():
 			timestamp = utcnow
 			self.__logger.warning("Corrected timestamp to now")
 
-		reading = Reading(timestamp, value, trend)
-		return reading
+		return Reading(timestamp, value, trend)
 
 	def __check_session_expire(self, result):
 		if (result['status'] == 401):

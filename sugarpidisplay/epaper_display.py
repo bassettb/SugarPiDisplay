@@ -1,12 +1,13 @@
 from PIL import Image,ImageDraw,ImageFont
 import sugarpidisplay.epd2in13_V2 as epd2in13
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import os
 import time
 import traceback
 from .trend import Trend
 from .graph import drawGraph
+from .utils import seconds_since
 
 minLogLevel = logging.INFO
 
@@ -28,7 +29,9 @@ class EpaperDisplay:
     __lastAge = 999
     __lastTrend = Trend.NONE
     __lastValue = None
-    __lastOld = False
+    __lastIsStale = False
+    __lastTimestamp = 0
+    __lastUpdateTime = datetime.now(timezone.utc)
 
     __arrowImgSingle = None
     __arrowImgDouble = None
@@ -129,33 +132,33 @@ class EpaperDisplay:
         self.__updateScreen()
 
     def update(self, updates):
-        oldReading = False
-        if 'oldReading' in updates.keys():
-            oldReading = updates['oldReading']
+        isStale = updates['oldReading']
+        value = updates['value']
+        trend = updates['trend']
+        if (trend is None or isStale):
+            trend = Trend.NONE
+        timestamp = updates['time']
         self.__setScreenModeToEgv()
 
-        if 'value' in updates.keys():
-            self.__update_value(updates['value'], oldReading)
-        if 'trend' in updates.keys():
-            self.__update_trend(updates['trend'], oldReading)
-        if self.__dirty:
-            self.__update_age(updates['time'], updates['age'])
-            if 'readings' in updates.keys():
-                self.__update_graph(updates['readings'])
+        shouldUpdate = self.__diff_from_last(value, isStale, trend, timestamp) or \
+           seconds_since(self.__lastUpdateTime) > 240
+        if not shouldUpdate:
+            return
 
+        self.__update_value(value, isStale)
+        self.__update_trend(trend)
+        self.__update_age(timestamp, updates['age'])
+        if 'readings' in updates.keys():
+            self.__update_graph(updates['readings'])
+
+        self.__dirty = True
+        self.__set_last(value, isStale, trend, timestamp)
         self.__updateScreen()
 
-    def __update_value(self, value, isOldReading):
-        if self.__lastValue == value and self.__lastOld == isOldReading:
-            return
-        self.__lastValue = value
-        self.__lastOld = isOldReading
-
-        strikeThrough = isOldReading
+    def __update_value(self, value, isStale):
+        strikeThrough = isStale or value is None
         valStr = ""
-        if (value is None):
-            strikeThrough = True
-        else:
+        if (value is not None):
             valStr = str(value)
         valStr = valStr.rjust(3)
         #print(valStr + "   " + str(mins))
@@ -166,7 +169,6 @@ class EpaperDisplay:
         textSize = self.__drawText(drawBg, textXY, valStr, self.__fontBG)
         if (strikeThrough):
             drawBg.line((textXY[0], textXY[1] + textSize[1]//2, textXY[0]+textSize[0], textXY[1] + textSize[1]//2), fill = 0, width=2)
-        self.__dirty = True
 
     def __drawText(self, draw, xy, text, font):
         offset = font.getoffset(text)
@@ -175,22 +177,13 @@ class EpaperDisplay:
         draw.text((xy[0]-offset[0], xy[1]-offset[1]), text, font = font, fill = 0)
         return textSize
 
-    def __update_trend(self, trend, isOldReading):
-        if (trend is None):
-            trend = Trend.NONE
-        if (isOldReading):
-            trend = Trend.NONE
-        if trend == self.__lastTrend:
-            return
-        self.__lastTrend = trend
+    def __update_trend(self, trend):
         self.__wipePanel(self.__trendPanel)
         arrowImg = self.__get_trend_image(trend)
         if (arrowImg is not None):
             self.__trendPanel.image.paste(arrowImg, (0,0))
-        self.__dirty = True
 
     def __update_age(self, timestamp, age):
-        self.__setScreenModeToEgv()
         #mins = (mins//2) * 2 # round to even number
         # if (mins == self.__lastAge):
         #     return
@@ -226,10 +219,7 @@ class EpaperDisplay:
         if (not self.__screenMode == "egv"):
             self.__logger.debug("Display mode EGV")
             self.__screenMode = "egv"
-            self.__lastAge = 999
-            self.__lastTrend = Trend.NONE
-            self.__lastValue = None
-            self.__lastOld = False
+            self.__set_last(None, False, Trend.NONE, 0)
 
     def __setScreenModeToText(self):
         if (not self.__screenMode == "text"):
@@ -240,7 +230,7 @@ class EpaperDisplay:
         w = size[0]
         h = size[1]
         x2 = w - 1
-        y2 = h - 1
+        #y2 = h - 1
         lw = 3
         self.__arrowImgSingle = Image.new('1', size, 255)
         draw = ImageDraw.Draw(self.__arrowImgSingle)
@@ -290,3 +280,17 @@ class EpaperDisplay:
         if(trend == Trend.RateOutOfRange):
             return None #"HI"
         return self.__arrowImgDouble.rotate(0) #"??"
+
+    def __set_last(self, value, isStale, trend, timestamp):
+            self.__lastValue = value
+            self.__lastIsStale = isStale
+            self.__lastTrend = trend
+            self.__lastTimestamp = timestamp
+            self.__lastUpdateTime = datetime.now(timezone.utc)
+            #self.__lastAge = 999
+    
+    def __diff_from_last(self, value, isStale, trend, timestamp):
+           return (self.__lastValue != value or 
+           self.__lastIsStale != isStale or
+           self.__lastTrend != trend or
+           self.__lastTimestamp != timestamp)

@@ -26,17 +26,18 @@ class ConsoleDisplay:
 
 	def update(self,updates):
 		print("got update")
-		if 'readings' in updates.keys():
-			testDrawGraph(updates['readings'])
+		self.__update_value_time_trend(updates['value'], updates['age'], updates['trend'])
+		#if 'readings' in updates.keys():
+		#	testDrawGraph(updates['readings'])
 
-	def update_value_time_trend(self,value,mins,trend):
+	def __update_value_time_trend(self,value,age,trend):
 		valStr = "--"
 		if (value > 0):
 			valStr = str(value)
 
-		print(valStr + "   " + self.__get_trend_word(trend) + "   " + str(mins))
+		print(valStr + "   " + self.__get_trend_word(trend) + "   " + str(age))
 		valStr = valStr.rjust(3)
-		self.update_age(mins)
+		self.update_age(age)
 
 
 	def update_age(self, mins):
