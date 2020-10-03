@@ -17,7 +17,8 @@
 
 ### Installing Dependencies
 - ``sudo apt-get install python3-pip``
-- ``sudo apt-get install python3-smbus``
+- ``sudo apt-get install python3-smbus  # only needed for 2-line display`` 
+- ``sudo apt-get install libopenjp2-7 libtiff5``
 - ``sudo apt-get install git``
 
 ### Installing SugarPiDisplay
