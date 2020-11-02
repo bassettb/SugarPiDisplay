@@ -7,15 +7,39 @@ import time
 import traceback
 from .trend import Trend
 from .graph import drawGraph
-from .utils import seconds_since
+from .utils import seconds_since, get_reading_age_minutes, get_stale_minutes
 
 minLogLevel = logging.INFO
+idleRefreshSeconds = 330
 
 class Panel:
     def __init__(self,xy,size):
         self.xy = xy
         self.size = size
         self.image = Image.new('1', size, 255)
+
+class ScreenData:
+
+    def __init__(self, readingTime = None, value = 0, trend = Trend.NONE):
+        self.ReadingTime = readingTime
+        self.Value = value
+        self.Trend = trend
+        self.Age = 999
+        self.IsStale = True
+        if (readingTime is not None):
+            self.Age = get_reading_age_minutes(readingTime)
+            self.IsStale = self.Age >= get_stale_minutes()
+        if (self.Trend is None or self.IsStale):
+            self.Trend = Trend.NONE
+
+        self.UpdateTime = datetime.now(timezone.utc)
+
+    def isDiff(self, other):
+        # exclude age, because it will increment every minute
+        return (self.ReadingTime != other.ReadingTime or
+        self.Value != other.Value or 
+        self.Trend != other.Trend or
+        self.IsStale != other.IsStale)
 
 class EpaperDisplay:
     __epd = None
@@ -26,13 +50,7 @@ class EpaperDisplay:
 
     __dirty = False
 
-    __lastAge = 999
-    __lastTrend = Trend.NONE
-    __lastValue = None
-    __lastIsStale = False
-    __lastTimestamp = 0
-    __lastUpdateTime = datetime.now(timezone.utc)
-
+    __lastScreenData = None
     __arrowImgSingle = None
     __arrowImgDouble = None
 
@@ -58,6 +76,7 @@ class EpaperDisplay:
         self.__fontTime = ImageFont.truetype(fontPath, 18)
 
         self.__initTrendImages(self.__trendPanel.size)
+        self.__lastScreenData = ScreenData()
         return None
 
     def open(self):
@@ -72,7 +91,7 @@ class EpaperDisplay:
         self.__epd = None
         return True
 
-    def __updateScreen(self):
+    def __drawScreen(self):
         if (not self.__dirty):
             return
         self.__dirty = False
@@ -129,31 +148,25 @@ class EpaperDisplay:
         self.__drawText(draw, (5,5), line0, self.__fontMsg)
         self.__drawText(draw, (5,40), line1, self.__fontMsg)
         self.__dirty = True
-        self.__updateScreen()
+        self.__drawScreen()
 
-    def update(self, updates):
-        isStale = updates['oldReading']
-        value = updates['value']
-        trend = updates['trend']
-        if (trend is None or isStale):
-            trend = Trend.NONE
-        timestamp = updates['time']
+    def update(self, readings):
         self.__setScreenModeToEgv()
 
-        shouldUpdate = self.__diff_from_last(value, isStale, trend, timestamp) or \
-           seconds_since(self.__lastUpdateTime) > 240
+        newScreenData = ScreenData(readings[0].timestamp, readings[0].value, readings[0].trend)
+
+        shouldUpdate = newScreenData.isDiff(self.__lastScreenData) or seconds_since(self.__lastScreenData.UpdateTime) > idleRefreshSeconds
         if not shouldUpdate:
             return
 
-        self.__update_value(value, isStale)
-        self.__update_trend(trend)
-        self.__update_age(timestamp, updates['age'])
-        if 'readings' in updates.keys():
-            self.__update_graph(updates['readings'])
+        self.__update_value(newScreenData.Value, newScreenData.IsStale)
+        self.__update_trend(newScreenData.Trend)
+        self.__update_age(newScreenData.ReadingTime, newScreenData.Age)
+        self.__update_graph(readings)
 
         self.__dirty = True
-        self.__set_last(value, isStale, trend, timestamp)
-        self.__updateScreen()
+        self.__lastScreenData = newScreenData
+        self.__drawScreen()
 
     def __update_value(self, value, isStale):
         strikeThrough = isStale or value is None
@@ -209,7 +222,7 @@ class EpaperDisplay:
     def __update_graph(self, readings):
         self.__wipePanel(self.__graphPanel)
         draw = ImageDraw.Draw(self.__graphPanel.image)
-        drawGraph(draw, readings)
+        drawGraph(readings, draw)
         self.__dirty = True
 
     def updateAnimation(self):
@@ -219,7 +232,7 @@ class EpaperDisplay:
         if (not self.__screenMode == "egv"):
             self.__logger.debug("Display mode EGV")
             self.__screenMode = "egv"
-            self.__set_last(None, False, Trend.NONE, 0)
+            self.__lastScreenData = ScreenData()
 
     def __setScreenModeToText(self):
         if (not self.__screenMode == "text"):
@@ -280,17 +293,3 @@ class EpaperDisplay:
         if(trend == Trend.RateOutOfRange):
             return None #"HI"
         return self.__arrowImgDouble.rotate(0) #"??"
-
-    def __set_last(self, value, isStale, trend, timestamp):
-            self.__lastValue = value
-            self.__lastIsStale = isStale
-            self.__lastTrend = trend
-            self.__lastTimestamp = timestamp
-            self.__lastUpdateTime = datetime.now(timezone.utc)
-            #self.__lastAge = 999
-    
-    def __diff_from_last(self, value, isStale, trend, timestamp):
-           return (self.__lastValue != value or 
-           self.__lastIsStale != isStale or
-           self.__lastTrend != trend or
-           self.__lastTimestamp != timestamp)

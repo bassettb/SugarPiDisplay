@@ -32,6 +32,13 @@ def seconds_since(x):
 	delta = datetime.now(timezone.utc) - x
 	return int(delta.total_seconds())
 
+def get_stale_minutes():
+    return 20
+
+def is_stale_reading(reading):
+    readingAgeMins = get_reading_age_minutes(reading.timestamp)
+    return readingAgeMins >= get_stale_minutes()
+
 
 class Reading():
 	timestamp = None

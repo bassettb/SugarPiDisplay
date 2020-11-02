@@ -1,6 +1,7 @@
 import smbus
 from RPLCD.i2c import CharLCD
 from .trend import Trend
+from .utils import Reading, get_reading_age_minutes, is_stale_reading
 
 class TwolineDisplay:
 	__lcd = None
@@ -58,18 +59,18 @@ class TwolineDisplay:
 			self.__lcd.cursor_pos = (1, 0)
 			self.__lcd.write_string(line1.center(16))
 
-	def update(self,updates):
+	def update(self, readings: [Reading]):
+		reading = readings[0]
 		self.__setScreenModeToEgv()
-		if 'age' in updates.keys():
-			self.__update_age(updates['age'])
-		if 'oldReading' in updates.keys() and updates['oldReading']:
+		isStale = is_stale_reading(reading)
+		if isStale:
 			self.__update_value(None)
 			self.__update_trend(None)
 			return
-		if 'value' in updates.keys():
-			self.__update_value(updates['value'])
-		if 'trend' in updates.keys():
-			self.__update_trend(updates['trend'])
+		age = get_reading_age_minutes(reading.timestamp)
+		self.__update_age(age)
+		self.__update_value(reading.value)
+		self.__update_trend(reading.trend)
 
 	def __update_value(self,value):
 		valStr = "--"
