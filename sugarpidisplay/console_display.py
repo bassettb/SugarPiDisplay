@@ -78,21 +78,21 @@ class ConsoleDisplay:
     def __get_trend_word(self, trend):
         if(trend == Trend.DoubleUp):
             return "DoubleUp"
-        elif(trend == Trend.SingleUp):
+        if(trend == Trend.SingleUp):
             return "SingleUp"
-        elif(trend == Trend.FortyFiveUp):
+        if(trend == Trend.FortyFiveUp):
             return "FortyFiveUp"
-        elif(trend == Trend.Flat):
+        if(trend == Trend.Flat):
             return "Flat"
-        elif(trend == Trend.FortyFiveDown):
+        if(trend == Trend.FortyFiveDown):
             return "FortyFiveDown"
-        elif(trend == Trend.SingleDown):
+        if(trend == Trend.SingleDown):
             return "SingleDown"
-        elif(trend == Trend.DoubleDown):
+        if(trend == Trend.DoubleDown):
             return "DoubleDown"
-        elif(trend == Trend.NotComputable):
+        if(trend == Trend.NotComputable):
             return "NOT COMPUTABLE"
-        elif(trend == Trend.RateOutOfRange):
+        if(trend == Trend.RateOutOfRange):
             return "RATE OUT OF RANGE"
-        else:
-            return "NONE"
+        
+        return "NONE"

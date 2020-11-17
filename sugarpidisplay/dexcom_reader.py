@@ -154,21 +154,21 @@ class DexcomReader():
 	def __translateTrend(self, trendNum):
 		if(trendNum == 1):
 			return Trend.DoubleUp
-		elif(trendNum == 2):
+		if(trendNum == 2):
 			return Trend.SingleUp
-		elif(trendNum == 3):
+		if(trendNum == 3):
 			return Trend.FortyFiveUp
-		elif(trendNum == 4):
+		if(trendNum == 4):
 			return Trend.Flat
-		elif(trendNum == 5):
+		if(trendNum == 5):
 			return Trend.FortyFiveDown
-		elif(trendNum == 6):
+		if(trendNum == 6):
 			return Trend.SingleDown
-		elif(trendNum == 7):
+		if(trendNum == 7):
 			return Trend.DoubleDown
-		elif(trendNum == 8):
+		if(trendNum == 8):
 			return Trend.NotComputable
-		elif(trendNum == 9):
+		if(trendNum == 9):
 			return Trend.RateOutOfRange
-		else:
-			return Trend.NONE
+
+		return Trend.NONE

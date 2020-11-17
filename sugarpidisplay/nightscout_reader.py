@@ -138,30 +138,28 @@ class NightscoutReader():
 		if (url.startswith('http://')):
 			url = url[7:]
 			return http.client.HTTPConnection(url)
-		elif (url.startswith('https://')):
+		if (url.startswith('https://')):
 			url = url[8:]
 			return http.client.HTTPSConnection(url)
-		else:
-			return http.client.HTTPConnection(url)
+		return http.client.HTTPConnection(url)
 
 	def __translateTrend(self, trendStr):
 		if(trendStr == "DoubleUp"):
 			return Trend.DoubleUp
-		elif(trendStr == "SingleUp"):
+		if(trendStr == "SingleUp"):
 			return Trend.SingleUp
-		elif(trendStr == "FortyFiveUp"):
+		if(trendStr == "FortyFiveUp"):
 			return Trend.FortyFiveUp
-		elif(trendStr == "Flat"):
+		if(trendStr == "Flat"):
 			return Trend.Flat
-		elif(trendStr == "FortyFiveDown"):
+		if(trendStr == "FortyFiveDown"):
 			return Trend.FortyFiveDown
-		elif(trendStr == "SingleDown"):
+		if(trendStr == "SingleDown"):
 			return Trend.SingleDown
-		elif(trendStr == "DoubleDown"):
+		if(trendStr == "DoubleDown"):
 			return Trend.DoubleDown
-		#elif(trendStr == "NotComputable"):
+		#if(trendStr == "NotComputable"):
 		#	return Trend.
-		#elif(trendStr == "RateOutOfRange"):
+		#if(trendStr == "RateOutOfRange"):
 		#	return Trend.
-		else:
-			return Trend.NONE
+		return Trend.NONE
