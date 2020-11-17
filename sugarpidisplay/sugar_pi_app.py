@@ -278,26 +278,29 @@ class SugarPiApp():
 		isNewReading = False
 
 		if len(readings) > 0:
-			reading = readings[0]
-			isNewReading = ((len(self.LastReadings) == 0) or (self.LastReadings[0].timestamp != reading.timestamp))
+			isNewReading = ((len(self.LastReadings) == 0) or (self.LastReadings[0].timestamp != readings[0].timestamp))
 			self.LastReadings = readings
 		if (isNewReading):
 			self.glucoseDisplay.update(readings)
-			ctx.setNextRunTimeTimestampPlusSeconds(reading.timestamp, self.interval_seconds+10)
+			ctx.setNextRunTimeTimestampPlusSeconds(readings[0].timestamp, self.interval_seconds+10)
 		else:
-			readingAgeMinutes = get_reading_age_minutes(reading.timestamp)
-			ctx.setNextRunDelaySeconds(self.__getReadingWaitBackoff(readingAgeMinutes))
+			ctx.setNextRunDelaySeconds(self.__getWaitWithBackoff(readings))
 
-	def __getReadingWaitBackoff(self,readingAgeMins):
+	def __getWaitWithBackoff(self, readings):
+		if (len(readings) == 0):
+			return 120
+
+		readingAgeMins = get_reading_age_minutes(readings[0].timestamp)
+		if (readingAgeMins >= 30):
+			return 90
 		if (readingAgeMins >= 10):
 			return 60
-		elif (readingAgeMins >= 6):
+		if (readingAgeMins >= 6):
 			return 30
-		elif (readingAgeMins >= 5):
-			return 15
-		else:
-			# We shouldn't get here.  A non-new reading should be older than 5 minutes
-			return 60
+		if (readingAgeMins >= 5):
+			return 15		
+		# We shouldn't get here.  A non-new reading should be older than 5 minutes
+		return 60
 
 class ExitEventHandler:
 	exit_now = False

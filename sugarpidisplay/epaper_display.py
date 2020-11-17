@@ -119,6 +119,7 @@ class EpaperDisplay:
         draw.rectangle(((0,0), img.size), fill = (255) )
         #size = (img.size[0]-1, img.size[1]-1)
         #draw.rectangle(((0,0), size), outline = (0), fill = (255) )
+
     def __wipePanel(self, panel):
         self.__wipeImage(panel.image)
 
@@ -161,7 +162,8 @@ class EpaperDisplay:
 
         self.__update_value(newScreenData.Value, newScreenData.IsStale)
         self.__update_trend(newScreenData.Trend)
-        self.__update_age(newScreenData.ReadingTime, newScreenData.Age)
+        #self.__update_age(newScreenData.ReadingTime, newScreenData.Age)
+        self.__update_clock(newScreenData.UpdateTime)
         self.__update_graph(readings)
 
         self.__dirty = True
@@ -196,7 +198,7 @@ class EpaperDisplay:
         if (arrowImg is not None):
             self.__trendPanel.image.paste(arrowImg, (0,0))
 
-    def __update_age(self, timestamp, age):
+    #def __update_age(self, timestamp, age):
         #mins = (mins//2) * 2 # round to even number
         # if (mins == self.__lastAge):
         #     return
@@ -209,7 +211,8 @@ class EpaperDisplay:
         # Get string in local time
         # TODO - what I'm calling a timestamp is really a datetime.  need to rename
 
-        atTime = datetime.fromtimestamp(timestamp.timestamp()).strftime('%I:%M%p')
+    def __update_clock(self, ts):
+        atTime = datetime.fromtimestamp(ts.timestamp()).strftime('%I:%M%p')
         atTime = atTime.replace("AM", "a").replace("PM", "p")
         atTime = atTime.rjust(6)
 
