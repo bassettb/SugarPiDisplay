@@ -29,7 +29,7 @@
 
 # Downloaded from:
 # https://github.com/waveshare/e-Paper/tree/master/RaspberryPi%26JetsonNano/python/lib/waveshare_epd
-# removed JetsonNano class and set implementation = RaspberryPi
+# removed JetsonNano class and set epdconfig = RaspberryPi
 # delay SPI.open until module_init
 
 import os
@@ -89,10 +89,6 @@ class RaspberryPi:
         self.GPIO.cleanup()
 
 
-implementation = RaspberryPi()
-
-for func in [x for x in dir(implementation) if not x.startswith('_')]:
-    setattr(sys.modules[__name__], func, getattr(implementation, func))
-
+epdconfig = RaspberryPi()
 
 ### END OF FILE ###

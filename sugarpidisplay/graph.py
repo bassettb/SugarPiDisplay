@@ -1,6 +1,7 @@
 from PIL import Image,ImageDraw,ImageFont
-from .utils import *
+from .utils import get_reading_age_minutes
 
+# screen dimensions
 gW = 122
 gH = 128
 
@@ -8,12 +9,16 @@ topMargin = 4
 botMargin = 4
 leftMargin = 1
 rightMargin = 1
-xZeroOffset = gW - 6 -1
-yZeroOffset = gH - botMargin - 1
+# x is time, from -55 minutes to 0
+# y is BG, from 60-400
+# xZero,yZero is in the bottom right corner
 maxBgVal = 400.0
 minBgVal = 60.0
 minTimeVal = -55
 maxTimeVal = 0
+xZeroOffset = gW - 6 -1
+yZeroOffset = gH - botMargin - 1
+
 
 def drawAxes(draw):
 
@@ -26,7 +31,7 @@ def drawAxes(draw):
 
     # x-ticks
     for t in range(maxTimeVal,minTimeVal-1,-5):
-        x = xZeroOffset + translateTimeToX(t)
+        x = translateTimeToX(t)
         draw.line(((x,yZeroOffset-1), (x,yZeroOffset+1)), fill = 0, width=1)
 
     # x-gridlines
@@ -34,7 +39,7 @@ def drawAxes(draw):
         drawTimeGridLine(draw, t, 4)
 
 def drawSafeBgGridLine(draw, value, gap):
-    y = yZeroOffset - translateBgToY(value)
+    y = translateBgToY(value)
     x = leftMargin
     while True:
         draw.point((x,y), fill=0)
@@ -43,7 +48,7 @@ def drawSafeBgGridLine(draw, value, gap):
             break
 
 def drawTimeGridLine(draw, time, gap):
-    x = xZeroOffset + translateTimeToX(time)
+    x = translateTimeToX(time)
     y = yZeroOffset - gap
     while True:
         draw.point((x,y), fill=0)
@@ -53,24 +58,24 @@ def drawTimeGridLine(draw, time, gap):
 
 def drawXYDot(draw, xy):
     x, y = xy
-    xP = xZeroOffset + x
-    yP = yZeroOffset - y
+    xP = x
+    yP = y
     draw.line(((xP-2,yP),(xP+2,yP)), fill = 0, width=3)
     draw.line(((xP,yP-2),(xP,yP+2)), fill = 0, width=3)
 
-def translateBgToY(y):
+def translateBgToY(bg):
+    bg = min((bg, maxBgVal))
+    bg = max((bg, minBgVal))
     valHeight = maxBgVal - minBgVal
     pixelHeight = gH - topMargin - botMargin
-    yScaled = ((y - minBgVal) / valHeight) * pixelHeight
-    return yScaled
+    yScaled = ((bg - minBgVal) / valHeight) * pixelHeight
+    return yZeroOffset - yScaled
 
-def translateTimeToX(bg):
-    return bg * 2
+def translateTimeToX(time):
+    return xZeroOffset + (time * 2)
 
 def translateValToXY(value):
     time, bg = value
-    bg = min((bg, maxBgVal))
-    bg = max((bg, minBgVal))
     return (translateTimeToX(time), translateBgToY(bg))
 
 def inTimeRange(value):
@@ -84,7 +89,7 @@ def valuesFromReadings(readings):
         values.append(value)
     return values
 
-def drawGraph(draw, readings):
+def drawGraph(readings, draw):
     values = valuesFromReadings(readings)
     drawAxes(draw)
 
@@ -96,8 +101,8 @@ def drawGraph(draw, readings):
     for xy in xyArray:
         drawXYDot(draw, xy)
 
-def testDrawGraph(readings):
+def drawGraphToFile(readings, filename):
     graphImg = Image.new('1', (gW, gH), 255)
     draw = ImageDraw.Draw(graphImg)
-    drawGraph(draw, readings)
-    graphImg.save("/Users/bryan/graph.png","PNG")
+    drawGraph(readings, draw)
+    graphImg.save(filename)

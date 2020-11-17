@@ -33,7 +33,7 @@
 # ignore Waveshare's Dev_exit "hack"
 
 import logging
-from . import epdconfig
+from .epdconfig import epdconfig
 #import numpy as np
 
 # Display resolution
@@ -316,4 +316,3 @@ class EPD:
         epdconfig.module_exit()
 
 ### END OF FILE ###
-

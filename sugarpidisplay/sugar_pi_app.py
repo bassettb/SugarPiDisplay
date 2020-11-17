@@ -37,14 +37,14 @@ class SugarPiApp():
 	interval_seconds = 300
 	ip_show_seconds = 4
 	ip_show_seconds_pc_mode = 2
-	oldReadingMinutes = 20
+	
 	__args = {'debug_mode': False, 'pc_mode': False, 'epaper': False}
 
 	logger = None
 	config = {}
 	glucoseDisplay = None
 	reader = None
-	LastReading = None
+	LastReadings = []
 
 	def config_server_worker(self):
 		from .sugarpiconfig import app
@@ -215,10 +215,8 @@ class SugarPiApp():
 		return stateFunc
 
 	def __updateTickers(self):
-		if self.LastReading is not None:
-			readingAgeMins = get_reading_age_minutes(self.LastReading.timestamp)
-			oldReading = readingAgeMins >= self.oldReadingMinutes
-			self.glucoseDisplay.update({'age':readingAgeMins, 'value':self.LastReading.value, 'trend':self.LastReading.trend, 'time':self.LastReading.timestamp, 'oldReading':oldReading})
+		if len(self.LastReadings) > 0:
+			self.glucoseDisplay.update(self.LastReadings)
 
 		if (self.config['use_animation']):
 			self.glucoseDisplay.updateAnimation()
@@ -276,33 +274,33 @@ class SugarPiApp():
 			ctx.setNextState(State.ReLogin)
 			return
 
-		readings = resp['reading']
-		reading = readings[0]
-		readingAgeMins = get_reading_age_minutes(reading.timestamp)
-		oldReading = readingAgeMins >= self.oldReadingMinutes
-		self.glucoseDisplay.update(
-			{'age':readingAgeMins, 'value':reading.value,
-			'trend':reading.trend, 'time':reading.timestamp,
-			'oldReading':oldReading, 'readings': readings})
+		readings = resp['readings']
+		isNewReading = False
 
-		isNewReading = ((self.LastReading is None) or (self.LastReading.timestamp != reading.timestamp))
-		self.LastReading = reading
+		if len(readings) > 0:
+			isNewReading = ((len(self.LastReadings) == 0) or (self.LastReadings[0].timestamp != readings[0].timestamp))
+			self.LastReadings = readings
 		if (isNewReading):
-			ctx.setNextRunTimeTimestampPlusSeconds(reading.timestamp, self.interval_seconds+10)
+			self.glucoseDisplay.update(readings)
+			ctx.setNextRunTimeTimestampPlusSeconds(readings[0].timestamp, self.interval_seconds+10)
 		else:
-			ctx.setNextRunDelaySeconds(self.__getReadingWaitBackoff(readingAgeMins))
+			ctx.setNextRunDelaySeconds(self.__getWaitWithBackoff(readings))
 
-	def __getReadingWaitBackoff(self,readingAgeMins):
+	def __getWaitWithBackoff(self, readings):
+		if (len(readings) == 0):
+			return 120
+
+		readingAgeMins = get_reading_age_minutes(readings[0].timestamp)
+		if (readingAgeMins >= 30):
+			return 90
 		if (readingAgeMins >= 10):
 			return 60
-		elif (readingAgeMins >= 6):
+		if (readingAgeMins >= 6):
 			return 30
-		elif (readingAgeMins >= 5):
-			return 15
-		else:
-			# We shouldn't get here.  A non-new reading should be older than 5 minutes
-			return 60
-
+		if (readingAgeMins >= 5):
+			return 15		
+		# We shouldn't get here.  A non-new reading should be older than 5 minutes
+		return 60
 
 class ExitEventHandler:
 	exit_now = False

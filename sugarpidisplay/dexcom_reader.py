@@ -47,6 +47,8 @@ class DexcomReader():
 			respStr = resp.read().decode("utf-8")
 			#print(respStr.decode("utf-8"))
 			sessionId = respStr.strip("\"")
+			# TODO - if the username is invalid or the password does not meet the pw requirements, 
+			# thesessionId returned will be 00000000-0000-0000-0000-000000000000
 			self.__logger.debug(sessionId)
 			self.__sessionId = sessionId
 			return True
@@ -72,10 +74,10 @@ class DexcomReader():
 			self.__logger.warning ("Response during get_latest_gv was " + str(result['status']))
 			return {'errorMsg' : "HTTP " + str(result['status'])}
 
-		reading = self.__parse_gv(result['content'])
-		if (reading is None):
+		readings = self.__parse_gv(result['content'])
+		if (readings is None):
 			return {'errorMsg' : 'Bad Resp'}
-		return { 'reading' : reading }
+		return { 'readings' : readings }
 
 	def __make_request(self):
 		result = { 'status': 0, 'content': '', 'error': None}
@@ -112,28 +114,31 @@ class DexcomReader():
 			if (len(list) == 0):
 				self.__logger.warning("Dexcom responded with empty list")
 				return None
-			# TODO - refactor to read all 12 readings
-			obj = list[0]
-			epochStr = re.sub('[^0-9]','', obj["WT"])
-			timestamp = datetime.fromtimestamp(int(epochStr)//1000, timezone.utc)
-			minutes_old = get_reading_age_minutes(timestamp)
-			value = obj["Value"]
-			trend = self.__translateTrend(obj["Trend"])
-			# Change this loglevel to INFO if you want each reading logged
-			self.__logger.debug("parsed: " + str(timestamp) + "   " + str(value) + "   " + str(trend) + "   " + str(minutes_old) + " mins" )
-			utcnow = datetime.now(timezone.utc)
-			if(timestamp > utcnow):
-				timestamp = utcnow
-				self.__logger.warning("Corrected timestamp to now")
 
-			reading = Reading()
-			reading.timestamp = timestamp
-			reading.value = value
-			reading.trend = trend
-			return reading
+			readings = []
+			for obj in list:
+				reading = self.__readingFromReturnedObject(obj)
+				if reading is not None:
+					readings.append(reading)
+			return readings
+
 		except Exception as e:
 			self.__logger.error('Exception during parse ' + str(e))
 			return None
+
+	def __readingFromReturnedObject(self,obj):
+		epochStr = re.sub('[^0-9]','', obj["WT"])
+		timestamp = datetime.fromtimestamp(int(epochStr)//1000, timezone.utc)
+		minutes_old = get_reading_age_minutes(timestamp)
+		value = obj["Value"]
+		trend = self.__translateTrend(obj["Trend"])
+		# Change this loglevel to INFO if you want each reading logged
+		self.__logger.debug("parsed: " + str(timestamp) + "   " + str(value) + "   " + str(trend) + "   " + str(minutes_old) + " mins" )
+		utcnow = datetime.now(timezone.utc)
+		if(timestamp > utcnow):
+			timestamp = utcnow
+			self.__logger.warning("Corrected timestamp to now")
+		return Reading(timestamp, value, trend)
 
 	def __check_session_expire(self, result):
         # Returns 200 with "SessionNotValid" if expired sessionId
@@ -149,21 +154,21 @@ class DexcomReader():
 	def __translateTrend(self, trendNum):
 		if(trendNum == 1):
 			return Trend.DoubleUp
-		elif(trendNum == 2):
+		if(trendNum == 2):
 			return Trend.SingleUp
-		elif(trendNum == 3):
+		if(trendNum == 3):
 			return Trend.FortyFiveUp
-		elif(trendNum == 4):
+		if(trendNum == 4):
 			return Trend.Flat
-		elif(trendNum == 5):
+		if(trendNum == 5):
 			return Trend.FortyFiveDown
-		elif(trendNum == 6):
+		if(trendNum == 6):
 			return Trend.SingleDown
-		elif(trendNum == 7):
+		if(trendNum == 7):
 			return Trend.DoubleDown
-		elif(trendNum == 8):
+		if(trendNum == 8):
 			return Trend.NotComputable
-		elif(trendNum == 9):
+		if(trendNum == 9):
 			return Trend.RateOutOfRange
-		else:
-			return Trend.NONE
+
+		return Trend.NONE
