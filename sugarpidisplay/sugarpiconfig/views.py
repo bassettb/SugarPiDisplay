@@ -6,23 +6,25 @@ import json
 from flask import Flask, redirect, request, render_template, flash
 from pathlib import Path
 from flask_wtf import FlaskForm
-from wtforms import StringField,SelectField,PasswordField,BooleanField
-from wtforms.validators import InputRequired,ValidationError
+from wtforms import StringField, SelectField, PasswordField, BooleanField
+from wtforms.validators import InputRequired, ValidationError
 from . import app
 
 source_dexcom = 'dexcom'
 source_nightscout = 'nightscout'
 
-LOG_FILENAME="sugarpidisplay.log"
+LOG_FILENAME = "sugarpidisplay.log"
 folder_name = '.sugarpidisplay'
 config_file = 'config.json'
 pi_sugar_path = os.path.join(str(Path.home()), folder_name)
 Path(pi_sugar_path).mkdir(exist_ok=True)
 
+
 def dexcom_field_check(form, field):
     if (form.data_source.data == source_dexcom):
         if (not field.data):
             raise ValidationError('Field cannot be empty')
+
 
 def nightscout_field_check(form, field):
     if (form.data_source.data == source_nightscout):
@@ -38,19 +40,24 @@ class MyForm(FlaskForm):
         choices=[(source_dexcom, 'Dexcom'), (source_nightscout, 'Nightscout')]
     )
     use_animation = BooleanField('Use Animation')
-    dexcom_user = StringField('Dexcom UserName', validators=[dexcom_field_check])
-    dexcom_pass = PasswordField('Dexcom Password', validators=[dexcom_field_check])
+    dexcom_user = StringField(
+        'Dexcom UserName', validators=[dexcom_field_check])
+    dexcom_pass = PasswordField(
+        'Dexcom Password', validators=[dexcom_field_check])
     ns_url = StringField('Nightscout URL', validators=[nightscout_field_check])
-    ns_token = StringField('Nightscout Access Token', validators=[nightscout_field_check])
+    ns_token = StringField('Nightscout Access Token',
+                           validators=[nightscout_field_check])
 
 
 @app.route('/hello')
 def hello_world():
     return 'Hello, World!'
 
+
 @app.route('/success')
 def success():
     return 'Your device is configured.  Now cycle the power and it will use the new settings'
+
 
 @app.route('/', methods=('GET', 'POST'))
 def setup():
@@ -66,8 +73,9 @@ def setup():
     loadData(form)
     return render_template('setup.html', form=form)
 
+
 def handle_submit(form):
-    config = { 'data_source': form.data_source.data }
+    config = {'data_source': form.data_source.data}
     config['use_animation'] = form.use_animation.data
     if (form.data_source.data == source_dexcom):
         config['dexcom_username'] = form.dexcom_user.data
@@ -78,8 +86,9 @@ def handle_submit(form):
 
     #__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     f = open(os.path.join(pi_sugar_path, config_file), "w")
-    json.dump(config, f, indent = 4)
+    json.dump(config, f, indent=4)
     f.close()
+
 
 def loadData(form):
     config_full_path = os.path.join(pi_sugar_path, config_file)

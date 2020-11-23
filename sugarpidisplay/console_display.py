@@ -1,7 +1,7 @@
 from .trend import Trend
 from .graph import *
 from .utils import Reading, get_reading_age_minutes, get_stale_minutes, is_stale_reading
-from datetime import datetime,timezone
+from datetime import datetime, timezone
 
 
 class ScreenData:
@@ -24,6 +24,7 @@ class ScreenData:
                 self.Value != other.Value or
                 self.Trend != other.Trend or
                 self.IsStale != other.IsStale)
+
 
 class ConsoleDisplay:
     __logger = None
@@ -62,8 +63,9 @@ class ConsoleDisplay:
             valStr = str(screenData.Value).rjust(3)
         age = self.__get_age_str(screenData.Age, screenData.IsStale)
         trendWord = self.__get_trend_word(screenData.Trend)
-        print(str(screenData.ReadingTime) + ":  " + valStr + "   " + trendWord + "   " + str(age))
-        
+        print(str(screenData.ReadingTime) + ":  " +
+              valStr + "   " + trendWord + "   " + str(age))
+
     def __get_age_str(self, age, isStale):
         ageStr = "now"
         if (age > get_stale_minutes()):
@@ -94,5 +96,5 @@ class ConsoleDisplay:
             return "NOT COMPUTABLE"
         if(trend == Trend.RateOutOfRange):
             return "RATE OUT OF RANGE"
-        
+
         return "NONE"

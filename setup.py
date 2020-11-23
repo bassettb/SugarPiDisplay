@@ -15,7 +15,7 @@ setup(
         'spidev',
         'RPi.GPIO'
         # only for 2-line display
-        # 'smbus', 
+        # 'smbus',
         # 'RPLCD'
     ],
     zip_safe=False
