@@ -1,4 +1,5 @@
-from PIL import Image,ImageDraw,ImageFont
+from PIL import Image, ImageDraw, ImageFont
+
 from .utils import get_reading_age_minutes
 
 # screen dimensions

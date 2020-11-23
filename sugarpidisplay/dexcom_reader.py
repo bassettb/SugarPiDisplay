@@ -1,9 +1,10 @@
 import http.client
-from datetime import datetime, timezone
-import re
 import json
-from .utils import Reading, get_reading_age_minutes
+import re
+from datetime import datetime, timezone
+
 from .trend import Trend
+from .utils import Reading, get_reading_age_minutes
 
 host = "share2.dexcom.com"
 login_resource = "/ShareWebServices/Services/General/LoginPublisherAccountByName"

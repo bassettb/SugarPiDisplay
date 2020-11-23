@@ -1,9 +1,10 @@
 import http.client
-from datetime import datetime, timezone
-import re
 import json
-from .utils import Reading, get_reading_age_minutes
+import re
+from datetime import datetime, timezone
+
 from .trend import Trend
+from .utils import Reading, get_reading_age_minutes
 
 ns_login_resource = "/api/v2/authorization/request"
 ns_latestgv_resource = "/api/v1/entries/sgv?count=12"

@@ -1,11 +1,11 @@
-from datetime import datetime, timezone, timedelta
 import time
+from datetime import datetime, timedelta, timezone
 
 try:
-    import sys
-    import socket
     import fcntl
+    import socket
     import struct
+    import sys
 
     def get_ip_address(ifname):
         try:

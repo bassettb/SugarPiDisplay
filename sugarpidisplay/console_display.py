@@ -1,7 +1,9 @@
-from .trend import Trend
-from .graph import *
-from .utils import Reading, get_reading_age_minutes, get_stale_minutes, is_stale_reading
 from datetime import datetime, timezone
+
+from .graph import *
+from .trend import Trend
+from .utils import (Reading, get_reading_age_minutes, get_stale_minutes,
+                    is_stale_reading)
 
 
 class ScreenData:

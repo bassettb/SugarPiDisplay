@@ -1,13 +1,15 @@
 """
 Routes and views for the flask application.
 """
-import os
 import json
-from flask import Flask, redirect, request, render_template, flash
+import os
 from pathlib import Path
+
+from flask import Flask, flash, redirect, render_template, request
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, PasswordField, BooleanField
+from wtforms import BooleanField, PasswordField, SelectField, StringField
 from wtforms.validators import InputRequired, ValidationError
+
 from . import app
 
 source_dexcom = 'dexcom'

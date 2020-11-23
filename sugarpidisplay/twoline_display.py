@@ -1,5 +1,6 @@
 import smbus
 from RPLCD.i2c import CharLCD
+
 from .trend import Trend
 from .utils import Reading, get_reading_age_minutes, is_stale_reading
 

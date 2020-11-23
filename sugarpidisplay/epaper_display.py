@@ -1,13 +1,16 @@
-from PIL import Image,ImageDraw,ImageFont
-import sugarpidisplay.epd2in13_V2 as epd2in13
-from datetime import datetime, timezone
 import logging
 import os
 import time
 import traceback
-from .trend import Trend
+from datetime import datetime, timezone
+
+from PIL import Image, ImageDraw, ImageFont
+
+import sugarpidisplay.epd2in13_V2 as epd2in13
+
 from .graph import drawGraph
-from .utils import seconds_since, get_reading_age_minutes, get_stale_minutes
+from .trend import Trend
+from .utils import get_reading_age_minutes, get_stale_minutes, seconds_since
 
 minLogLevel = logging.INFO
 idleRefreshSeconds = 330

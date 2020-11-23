@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
+import http.client
+import json
+import logging
 import os
-import sys
 import platform
 import signal
+import sys
 import threading
-import http.client
-from datetime import datetime, timezone, timedelta
 import time
+from datetime import datetime, timedelta, timezone
 from enum import Enum
-
-import logging
 from logging.handlers import RotatingFileHandler
-import json
 from pathlib import Path
 
-from .utils import Reading, get_reading_age_minutes, now_plus_seconds, get_ip_address
 from .config_utils import *
-from .nightscout_reader import NightscoutReader
 from .dexcom_reader import DexcomReader
+from .nightscout_reader import NightscoutReader
+from .utils import (Reading, get_ip_address, get_reading_age_minutes,
+                    now_plus_seconds)
 
 
 class State(Enum):
