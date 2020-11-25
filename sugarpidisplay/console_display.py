@@ -1,29 +1,9 @@
+from datetime import datetime, timezone
+
 from .trend import Trend
-from .graph import *
-from .utils import Reading, get_reading_age_minutes, get_stale_minutes, is_stale_reading
-from datetime import datetime,timezone
+from .utils import (Reading, get_reading_age_minutes, get_stale_minutes,
+                    is_stale_reading)
 
-
-class ScreenData:
-
-    def __init__(self, readingTime=None, value=0, trend=Trend.NONE):
-        self.ReadingTime = readingTime
-        self.Value = value
-        self.Trend = trend
-        self.Age = 999
-        self.IsStale = True
-        if (readingTime is not None):
-            self.Age = get_reading_age_minutes(readingTime)
-            self.IsStale = self.Age >= get_stale_minutes()
-        self.UpdateTime = datetime.now(timezone.utc)
-
-    def isDiff(self, other):
-        # include age, we can update the console every minute
-        return (self.ReadingTime != other.ReadingTime or
-                self.Age != other.Age or
-                self.Value != other.Value or
-                self.Trend != other.Trend or
-                self.IsStale != other.IsStale)
 
 class ConsoleDisplay:
     __logger = None
@@ -62,8 +42,9 @@ class ConsoleDisplay:
             valStr = str(screenData.Value).rjust(3)
         age = self.__get_age_str(screenData.Age, screenData.IsStale)
         trendWord = self.__get_trend_word(screenData.Trend)
-        print(str(screenData.ReadingTime) + ":  " + valStr + "   " + trendWord + "   " + str(age))
-        
+        print(str(screenData.ReadingTime) + ":  " +
+              valStr + "   " + trendWord + "   " + str(age))
+
     def __get_age_str(self, age, isStale):
         ageStr = "now"
         if (age > get_stale_minutes()):
@@ -94,5 +75,27 @@ class ConsoleDisplay:
             return "NOT COMPUTABLE"
         if(trend == Trend.RateOutOfRange):
             return "RATE OUT OF RANGE"
-        
+
         return "NONE"
+
+
+class ScreenData:
+
+    def __init__(self, readingTime=None, value=0, trend=Trend.NONE):
+        self.ReadingTime = readingTime
+        self.Value = value
+        self.Trend = trend
+        self.Age = 999
+        self.IsStale = True
+        if (readingTime is not None):
+            self.Age = get_reading_age_minutes(readingTime)
+            self.IsStale = self.Age >= get_stale_minutes()
+        self.UpdateTime = datetime.now(timezone.utc)
+
+    def isDiff(self, other):
+        # include age, we can update the console every minute
+        return (self.ReadingTime != other.ReadingTime or
+                self.Age != other.Age or
+                self.Value != other.Value or
+                self.Trend != other.Trend or
+                self.IsStale != other.IsStale)
