@@ -14,6 +14,8 @@ from .utils import get_reading_age_minutes, get_stale_minutes, seconds_since
 
 minLogLevel = logging.INFO
 idleRefreshSeconds = 330
+EPD_WIDTH       = 122
+EPD_HEIGHT      = 250
 
 
 class EpaperDisplay:
@@ -32,16 +34,16 @@ class EpaperDisplay:
     def __init__(self, logger):
         self.__logger = logger
         self.__hPortraitImage = Image.new(
-            '1', (epd2in13.EPD_WIDTH, epd2in13.EPD_HEIGHT), 255)   # 122x250
+            '1', (EPD_WIDTH, EPD_HEIGHT), 255)   # 122x250
         self.__hLandscapeImage = Image.new(
-            '1', (epd2in13.EPD_HEIGHT, epd2in13.EPD_WIDTH), 255)   # 250x122
+            '1', (EPD_HEIGHT, EPD_WIDTH), 255)   # 250x122
 
         self.__bgPanel = Panel((0, 0), (122, 70))
         self.__agePanel = Panel((0, 70), (70, 52))
         self.__trendPanel = Panel((70, 70), (52, 52))
         self.__graphPanel = Panel((0, 122), (122, 128))
         self.__bannerPanel = Panel(
-            (0, 0), (epd2in13.EPD_HEIGHT, epd2in13.EPD_WIDTH))
+            (0, 0), (EPD_HEIGHT, EPD_WIDTH))
 
         self.__allPanels = [self.__bgPanel, self.__agePanel,
                             self.__trendPanel, self.__graphPanel, self.__bannerPanel]
@@ -265,7 +267,6 @@ class EpaperDisplay:
         return bitRotatedImg.crop((w, h, w+w, h+h))
 
     def __get_trend_image(self, trend):
-
         if(trend == Trend.NONE):
             return None  # "**"
         if(trend == Trend.DoubleUp):
