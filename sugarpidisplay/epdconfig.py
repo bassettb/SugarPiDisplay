@@ -28,7 +28,7 @@
 #
 
 # Downloaded from:
-# https://github.com/waveshare/e-Paper/tree/master/RaspberryPi%26JetsonNano/python/lib/waveshare_epd
+# https://github.com/waveshare/e-Paper/tree/master/RaspberryPi_JetsonNano/python/lib/waveshare_epd
 # removed JetsonNano class and set epdconfig = RaspberryPi
 # delay SPI.open until module_init
 
