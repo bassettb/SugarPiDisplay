@@ -13,7 +13,7 @@ rightMargin = 1
 # x is time, from -55 minutes to 0
 # y is BG, from 60-400
 # xZero,yZero is in the bottom right corner
-maxBgVal = 400.0
+maxBgVal = 300.0
 minBgVal = 60.0
 minTimeVal = -55
 maxTimeVal = 0
