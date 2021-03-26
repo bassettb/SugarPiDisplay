@@ -14,6 +14,8 @@ from . import app
 
 source_dexcom = 'dexcom'
 source_nightscout = 'nightscout'
+unit_mmolperL = 'mmolperL'
+unit_mgperdL = 'mgperdL'
 
 LOG_FILENAME = "sugarpidisplay.log"
 folder_name = '.sugarpidisplay'
@@ -41,7 +43,12 @@ class MyForm(FlaskForm):
         'Data Source',
         choices=[(source_dexcom, 'Dexcom'), (source_nightscout, 'Nightscout')]
     )
-    use_animation = BooleanField('Use Animation')
+    time24hour = BooleanField('24hour time')
+    unit = SelectField(
+        'Unit',
+        choices=[(unit_mgperdL, 'mg/dL'), (unit_mmolperL, 'mmol/L')]
+    )
+
     dexcom_user = StringField(
         'Dexcom UserName', validators=[dexcom_field_check])
     dexcom_pass = PasswordField(
@@ -78,13 +85,15 @@ def setup():
 
 def handle_submit(form):
     config = {'data_source': form.data_source.data}
-    config['use_animation'] = form.use_animation.data
+    config['time_24hour'] = form.time24hour.data
     if (form.data_source.data == source_dexcom):
         config['dexcom_username'] = form.dexcom_user.data
         config['dexcom_password'] = form.dexcom_pass.data
     else:
         config['nightscout_url'] = form.ns_url.data
         config['nightscout_access_token'] = form.ns_token.data
+
+    config['unit_mmol/L'] = form.unit.data == unit_mmolperL
 
     #__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     f = open(os.path.join(pi_sugar_path, config_file), "w")
@@ -112,6 +121,9 @@ def loadData(form):
                     form.ns_url.data = config['nightscout_url']
                 if ('nightscout_access_token' in config):
                     form.ns_token.data = config['nightscout_access_token']
-        form.use_animation.data = config['use_animation']
+        form.time24hour.data = config['time_24hour']
+        form.unit.data = unit_mgperdL
+        if config['unit_mmol/L']:
+            form.unit.data = unit_mmolperL
     except:
         pass

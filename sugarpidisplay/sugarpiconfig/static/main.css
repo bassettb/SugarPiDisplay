@@ -63,8 +63,6 @@ form input#ns_url,
 form input#ns_token {
     width: 400px;
     background-color: #fafafa;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
     border: 1px solid #cccccc;
     padding: 5px;
@@ -74,8 +72,6 @@ form input#ns_token {
 form input[type=checkbox] {
     width: 30px;
     height: 30px;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
     border: 1px solid #cccccc;
     padding: 5px;
@@ -84,8 +80,6 @@ form input[type=checkbox] {
 
 form input[type=submit] {
     display: block;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
     border-radius: 3px;
     border: 1px solid #d8d8d8;
     padding: 10px;
@@ -93,10 +87,6 @@ form input[type=submit] {
     text-align: center;
     color: #000000;
     background-color: #f4f4f4;
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f4f4f4), color-stop(100%, #e5e5e5));
-    background-image: -webkit-linear-gradient(top, #f4f4f4, #e5e5e5);
-    background-image: -moz-linear-gradient(top, #f4f4f4, #e5e5e5);
-    background-image: -o-linear-gradient(top, #f4f4f4, #e5e5e5);
     background-image: linear-gradient(top, #f4f4f4, #e5e5e5);
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#f4f4f4, endColorstr=#e5e5e5);
 }
@@ -105,10 +95,6 @@ form input[type=submit]:hover {
     cursor: pointer;
     border: 1px solid #c1c1c1;
     background-color: #dbdbdb;
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#dbdbdb), color-stop(100%, #cccccc));
-    background-image: -webkit-linear-gradient(top, #dbdbdb, #cccccc);
-    background-image: -moz-linear-gradient(top, #dbdbdb, #cccccc);
-    background-image: -o-linear-gradient(top, #dbdbdb, #cccccc);
     background-image: linear-gradient(top, #dbdbdb, #cccccc);
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#dbdbdb, endColorstr=#cccccc);
 }
