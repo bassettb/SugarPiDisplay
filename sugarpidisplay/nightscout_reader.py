@@ -53,7 +53,7 @@ class NightscoutReader():
     def get_latest_gv(self):
         result = self.__make_request()
         if (self.__check_session_expire(result)):
-            return {"tokenFailed": True}
+            return {'tokenFailed': True}
         if (result['error'] is not None):
             return {'errorMsg': result['error']}
         if (result['status'] != 200):
