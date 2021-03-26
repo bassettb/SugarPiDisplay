@@ -108,11 +108,11 @@ class SugarPiApp():
         self.logger.addHandler(handler)
 
     def __get_reader(self):
-        if (self.config["data_source"] == "dexcom"):
+        if (self.config['data_source'] == "dexcom"):
             self.logger.info('Loading dexcom reader')
             self.reader = DexcomReader(self.logger)
             return self.reader.set_config(self.config)
-        elif (self.config["data_source"] == "nightscout"):
+        elif (self.config['data_source'] == "nightscout"):
             self.logger.info('Loading nightscout reader')
             self.reader = NightscoutReader(self.logger)
             return self.reader.set_config(self.config)

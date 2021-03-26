@@ -133,11 +133,11 @@ class DexcomReader():
             return None
 
     def __readingFromReturnedObject(self, obj):
-        epochStr = re.sub('[^0-9]', '', obj["WT"])
+        epochStr = re.sub('[^0-9]', '', obj['WT'])
         timestamp = datetime.fromtimestamp(int(epochStr)//1000, timezone.utc)
         minutes_old = get_reading_age_minutes(timestamp)
-        value = obj["Value"]
-        trend = self.__translateTrend(obj["Trend"])
+        value = obj['Value']
+        trend = self.__translateTrend(obj['Trend'])
         # Change this loglevel to INFO if you want each reading logged
         self.__logger.debug("parsed: " + str(timestamp) + "   " + str(value) +
                             "   " + str(trend) + "   " + str(minutes_old) + " mins")
