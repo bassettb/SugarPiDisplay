@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from .trend import Trend
 from .utils import Reading, get_reading_age_minutes
+from .config_utils import Cfg
 
 host = "share2.dexcom.com"
 login_resource = "/ShareWebServices/Services/General/LoginPublisherAccountByName"
@@ -24,11 +25,8 @@ class DexcomReader():
         self.__logger = logger
 
     def set_config(self, __config):
-        if 'dexcom_username' not in __config.keys() or 'dexcom_password' not in __config.keys():
-            self.__logger.error('Invalid Dexcom __config values')
-            return False
-        self.__config['username'] = __config['dexcom_username']
-        self.__config['password'] = __config['dexcom_password']
+        self.__config[Cfg.dex_user] = __config[Cfg.dex_user]
+        self.__config[Cfg.dex_pass] = __config[Cfg.dex_pass]
         return True
 
     def login(self):
@@ -52,7 +50,7 @@ class DexcomReader():
             #print(respStr.decode("utf-8"))
             sessionId = respStr.strip("\"")
             # TODO - if the username is invalid or the password does not meet the pw requirements,
-            # thesessionId returned will be 00000000-0000-0000-0000-000000000000
+            # the sessionId returned will be 00000000-0000-0000-0000-000000000000
             self.__logger.debug(sessionId)
             self.__sessionId = sessionId
             return True
@@ -62,8 +60,8 @@ class DexcomReader():
 
     def __get_payload_for_login(self):
         loginObj = {
-            'accountName': self.__config['username'],
-            'password': self.__config['password'],
+            'accountName': self.__config[Cfg.dex_user],
+            'password': self.__config[Cfg.dex_pass],
             'applicationId': dex_applicationId
         }
         return json.dumps(loginObj)

@@ -13,6 +13,9 @@ class ConsoleDisplay:
         self.LastScreenData = ScreenData()
         return None
 
+    def set_config(self, config):
+        return
+
     def open(self):
         return True
 

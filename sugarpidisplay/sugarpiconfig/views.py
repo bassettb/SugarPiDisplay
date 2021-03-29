@@ -9,7 +9,7 @@ from flask import Flask, flash, redirect, render_template, request
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, PasswordField, SelectField, StringField
 from wtforms.validators import InputRequired, ValidationError
-
+from ..config_utils import Cfg
 from . import app
 
 source_dexcom = 'dexcom'
@@ -53,9 +53,10 @@ class MyForm(FlaskForm):
         'Dexcom UserName', validators=[dexcom_field_check])
     dexcom_pass = PasswordField(
         'Dexcom Password', validators=[dexcom_field_check])
-    ns_url = StringField('Nightscout URL', validators=[nightscout_field_check])
-    ns_token = StringField('Nightscout Access Token',
-                           validators=[nightscout_field_check])
+    ns_url = StringField(
+        'Nightscout URL', validators=[nightscout_field_check])
+    ns_token = StringField(
+        'Nightscout Access Token', validators=[nightscout_field_check])
 
 
 @app.route('/hello')
@@ -84,16 +85,16 @@ def setup():
 
 
 def handle_submit(form):
-    config = {'data_source': form.data_source.data}
-    config['time_24hour'] = form.time24hour.data
+    config = {Cfg.data_source: form.data_source.data}
+    config[Cfg.time_24hour] = form.time24hour.data
     if (form.data_source.data == source_dexcom):
-        config['dexcom_username'] = form.dexcom_user.data
-        config['dexcom_password'] = form.dexcom_pass.data
+        config[Cfg.dex_user] = form.dexcom_user.data
+        config[Cfg.dex_pass] = form.dexcom_pass.data
     else:
-        config['nightscout_url'] = form.ns_url.data
-        config['nightscout_access_token'] = form.ns_token.data
+        config[Cfg.ns_url] = form.ns_url.data
+        config[Cfg.ns_token] = form.ns_token.data
 
-    config['unit_mmol/L'] = form.unit.data == unit_mmolperL
+    config[Cfg.unit_mmol] = form.unit.data == unit_mmolperL
 
     #__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     f = open(os.path.join(pi_sugar_path, config_file), "w")
@@ -109,21 +110,21 @@ def loadData(form):
         f = open(config_full_path, "r")
         config = json.load(f)
         f.close()
-        if ('data_source' in config):
-            form.data_source.data = config['data_source']
-            if (config['data_source'] == source_dexcom):
-                if ('dexcom_username' in config):
-                    form.dexcom_user.data = config['dexcom_username']
-                if ('dexcom_password' in config):
-                    form.dexcom_pass.data = config['dexcom_password']
-            if (config['data_source'] == source_nightscout):
-                if ('nightscout_url' in config):
-                    form.ns_url.data = config['nightscout_url']
-                if ('nightscout_access_token' in config):
-                    form.ns_token.data = config['nightscout_access_token']
-        form.time24hour.data = config['time_24hour']
+        if (Cfg.data_source in config):
+            form.data_source.data = config[Cfg.data_source]
+            if (config[Cfg.data_source] == source_dexcom):
+                if (Cfg.dex_user in config):
+                    form.dexcom_user.data = config[Cfg.dex_user]
+                if (Cfg.dex_pass in config):
+                    form.dexcom_pass.data = config[Cfg.dex_pass]
+            if (config[Cfg.data_source] == source_nightscout):
+                if (Cfg.ns_url in config):
+                    form.ns_url.data = config[Cfg.ns_url]
+                if (Cfg.ns_token in config):
+                    form.ns_token.data = config[Cfg.ns_token]
+        form.time24hour.data = config[Cfg.time_24hour]
         form.unit.data = unit_mgperdL
-        if config['unit_mmol/L']:
+        if config[Cfg.unit_mmol]:
             form.unit.data = unit_mmolperL
     except:
         pass
