@@ -1,6 +1,6 @@
 import json
 
-class Cfg(Enum):
+class Cfg():
     data_source = 'data_source'
     ns_url = 'nightscout_url'
     ns_token = 'nightscout_access_token'
@@ -25,8 +25,8 @@ def validateConfig(config):
         if Cfg.dex_user not in config or Cfg.dex_pass not in config:
             return False
     elif (config[Cfg.data_source] == "nightscout"):
-        if Cfg.ns_url not in config.keys() or Cfg.ns_token not in config.keys():
+        if Cfg.ns_url not in config or Cfg.ns_token not in config:
             return False
-    else
+    else:
         return False
     return True

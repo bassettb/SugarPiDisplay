@@ -206,7 +206,7 @@ class EpaperDisplay:
 
     def __update_clock(self, ts):
         atTime = ''
-        if config[Cfg.time_24hour]:
+        if self.__config[Cfg.time_24hour]:
             atTime = datetime.fromtimestamp(ts.timestamp()).strftime('%-H:%M')
         else:
             atTime = datetime.fromtimestamp(ts.timestamp()).strftime('%-I:%M%p')
