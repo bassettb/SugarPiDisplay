@@ -1,26 +1,13 @@
-/* Contact form */
-
-
 body {
-    padding-top: 50px;
+    padding-top: 20px;
     padding-bottom: 20px;
 }
 
-/* Set padding to keep content from hitting the edges */
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
 }
 
-/* Set width on the form input elements since they're 100% wide by default
-input,
-select,
-textarea {
-    max-width: 280px;
-}
-*/
-
-/* styles for validation helpers */
 .field-validation-error {
     color: #b94a48;
 }
@@ -47,20 +34,21 @@ input[type="checkbox"].input-validation-error {
 
 
 
-
-
 form label {
     font-size: 1.2em;
     font-weight: bold;
-    display: block;
-    padding: 10px 0;
+    padding-right: 10px;
 }
 
-form select#data_source,
-form input#dexcom_user,
-form input#dexcom_pass,
-form input#ns_url,
-form input#ns_token {
+form .block {
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
+}
+
+form select,
+form input[type=password],
+form input[type=text] {
     width: 400px;
     background-color: #fafafa;
     border-radius: 3px;
@@ -70,8 +58,8 @@ form input#ns_token {
 }
 
 form input[type=checkbox] {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     border-radius: 3px;
     border: 1px solid #cccccc;
     padding: 5px;
@@ -82,13 +70,19 @@ form input[type=submit] {
     display: block;
     border-radius: 3px;
     border: 1px solid #d8d8d8;
-    padding: 10px;
+    padding: 10px 20px;
+    height: 40px;
+    margin: 10px 0;
     font-weight: bold;
     text-align: center;
     color: #000000;
     background-color: #f4f4f4;
     background-image: linear-gradient(top, #f4f4f4, #e5e5e5);
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#f4f4f4, endColorstr=#e5e5e5);
+}
+
+form select#unit {
+    width: 120px;
 }
 
 form input[type=submit]:hover {
@@ -99,7 +93,6 @@ form input[type=submit]:hover {
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#dbdbdb, endColorstr=#cccccc);
 }
 
-/* Message flashing */
 .flash {
     background-color: #FBB0B0;
     padding: 10px;
