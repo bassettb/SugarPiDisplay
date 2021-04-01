@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from .trend import Trend
 from .utils import Reading, get_reading_age_minutes
+from .config_utils import Cfg
 
 host = "share2.dexcom.com"
 login_resource = "/ShareWebServices/Services/General/LoginPublisherAccountByName"
@@ -24,11 +25,8 @@ class DexcomReader():
         self.__logger = logger
 
     def set_config(self, __config):
-        if 'dexcom_username' not in __config.keys() or 'dexcom_password' not in __config.keys():
-            self.__logger.error('Invalid Dexcom __config values')
-            return False
-        self.__config['username'] = __config['dexcom_username']
-        self.__config['password'] = __config['dexcom_password']
+        self.__config[Cfg.dex_user] = __config[Cfg.dex_user]
+        self.__config[Cfg.dex_pass] = __config[Cfg.dex_pass]
         return True
 
     def login(self):
@@ -52,7 +50,7 @@ class DexcomReader():
             #print(respStr.decode("utf-8"))
             sessionId = respStr.strip("\"")
             # TODO - if the username is invalid or the password does not meet the pw requirements,
-            # thesessionId returned will be 00000000-0000-0000-0000-000000000000
+            # the sessionId returned will be 00000000-0000-0000-0000-000000000000
             self.__logger.debug(sessionId)
             self.__sessionId = sessionId
             return True
@@ -62,8 +60,8 @@ class DexcomReader():
 
     def __get_payload_for_login(self):
         loginObj = {
-            'accountName': self.__config['username'],
-            'password': self.__config['password'],
+            'accountName': self.__config[Cfg.dex_user],
+            'password': self.__config[Cfg.dex_pass],
             'applicationId': dex_applicationId
         }
         return json.dumps(loginObj)
@@ -71,7 +69,7 @@ class DexcomReader():
     def get_latest_gv(self):
         result = self.__make_request()
         if (self.__check_session_expire(result)):
-            return {"tokenFailed": True}
+            return {'tokenFailed': True}
         if (result['error'] is not None):
             return {'errorMsg': result['error']}
         if (result['status'] != 200):
@@ -133,11 +131,11 @@ class DexcomReader():
             return None
 
     def __readingFromReturnedObject(self, obj):
-        epochStr = re.sub('[^0-9]', '', obj["WT"])
+        epochStr = re.sub('[^0-9]', '', obj['WT'])
         timestamp = datetime.fromtimestamp(int(epochStr)//1000, timezone.utc)
         minutes_old = get_reading_age_minutes(timestamp)
-        value = obj["Value"]
-        trend = self.__translateTrend(obj["Trend"])
+        value = obj['Value']
+        trend = self.__translateTrend(obj['Trend'])
         # Change this loglevel to INFO if you want each reading logged
         self.__logger.debug("parsed: " + str(timestamp) + "   " + str(value) +
                             "   " + str(trend) + "   " + str(minutes_old) + " mins")

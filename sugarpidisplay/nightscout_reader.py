@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from .trend import Trend
 from .utils import Reading, get_reading_age_minutes
+from .config_utils import Cfg
 
 ns_login_resource = "/api/v2/authorization/request"
 ns_latestgv_resource = "/api/v1/entries/sgv?count=12"
@@ -19,18 +20,14 @@ class NightscoutReader():
         self.__logger = logger
 
     def set_config(self, config):
-        self.__config.clear()
-        if 'nightscout_url' not in config.keys() or 'nightscout_access_token' not in config.keys():
-            self.__logger.error('Invalid Nightscout config values')
-            return False
-        self.__config['url'] = config['nightscout_url']
-        self.__config['accessToken'] = config['nightscout_access_token']
+        self.__config[Cfg.ns_url] = config[Cfg.ns_url]
+        self.__config[Cfg.ns_token] = config[Cfg.ns_token]
         return True
 
     def login(self):
         self.__sessionId = ""
         try:
-            resource = ns_login_resource + "/" + self.__config['accessToken']
+            resource = ns_login_resource + "/" + self.__config[Cfg.ns_token]
             conn = self.__get_connection()
             conn.request("GET", resource)
 
@@ -53,7 +50,7 @@ class NightscoutReader():
     def get_latest_gv(self):
         result = self.__make_request()
         if (self.__check_session_expire(result)):
-            return {"tokenFailed": True}
+            return {'tokenFailed': True}
         if (result['error'] is not None):
             return {'errorMsg': result['error']}
         if (result['status'] != 200):
@@ -115,14 +112,14 @@ class NightscoutReader():
             return None
 
     def __readingFromReturnedObject(self, obj):
-        if (obj["type"] != 'sgv'):
+        if (obj['type'] != 'sgv'):
             self.__logger.warning("Nightscout: entry was not sgv")
             return None
-        epoch = obj["date"]
+        epoch = obj['date']
         timestamp = datetime.fromtimestamp(int(epoch//1000), timezone.utc)
         minutes_old = get_reading_age_minutes(timestamp)
-        value = obj["sgv"]
-        trend = self.__translateTrend(obj["direction"])
+        value = obj['sgv']
+        trend = self.__translateTrend(obj['direction'])
         # Change this loglevel to INFO if you want each reading logged
         self.__logger.debug("parsed: " + str(timestamp) + "   " + str(value) +
                             "   " + str(trend) + "   " + str(minutes_old) + " mins")
@@ -139,7 +136,7 @@ class NightscoutReader():
         return False
 
     def __get_connection(self):
-        url = self.__config['url'].lower()
+        url = self.__config[Cfg.ns_url].lower()
         if (url.startswith('http://')):
             url = url[7:]
             return http.client.HTTPConnection(url)

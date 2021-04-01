@@ -3,11 +3,11 @@ import os
 import time
 import traceback
 from datetime import datetime, timezone
-
 from PIL import Image, ImageDraw, ImageFont
 
 import sugarpidisplay.epd2in13_V2 as epd2in13
 
+from .config_utils import Cfg
 from .graph import drawGraph
 from .trend import Trend
 from .utils import get_reading_age_minutes, get_stale_minutes, seconds_since
@@ -17,8 +17,8 @@ idleRefreshSeconds = 330
 EPD_WIDTH       = 122
 EPD_HEIGHT      = 250
 
-
 class EpaperDisplay:
+    __config = {}
     __epd = None
     __screenMode = ""
     __logger = None
@@ -59,6 +59,9 @@ class EpaperDisplay:
         self.__initTrendImages(self.__trendPanel.size)
         self.__lastScreenData = ScreenData()
         return None
+
+    def set_config(self, config):
+        self.__config[Cfg.time_24hour] = config[Cfg.time_24hour]
 
     def open(self):
         self.__epd = epd2in13.EPD()
@@ -202,8 +205,12 @@ class EpaperDisplay:
         # TODO - what I'm calling a timestamp is really a datetime.  need to rename
 
     def __update_clock(self, ts):
-        atTime = datetime.fromtimestamp(ts.timestamp()).strftime('%I:%M%p')
-        atTime = atTime.replace("AM", "a").replace("PM", "p")
+        atTime = ''
+        if self.__config[Cfg.time_24hour]:
+            atTime = datetime.fromtimestamp(ts.timestamp()).strftime('%-H:%M')
+        else:
+            atTime = datetime.fromtimestamp(ts.timestamp()).strftime('%-I:%M%p')
+            atTime = atTime.replace("AM", "a").replace("PM", "p")
         atTime = atTime.rjust(6)
 
         self.__wipePanel(self.__agePanel)

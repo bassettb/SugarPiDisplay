@@ -1,27 +1,33 @@
 <html>
+
 <head>
-<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
-<meta name="viewport" content="width=device-width"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
+  <meta name="viewport" content="width=device-width" />
 </head>
 
 <body>
-<form method="POST" action="{{ url_for('setup') }}" name="configForm">
-    <br />
-    {{ form.data_source.label}}    {{ form.data_source}}
-    <br />
-    {{ form.use_animation.label}}    {{ form.use_animation}}
-    <br />
-    <br />
-    <div class="setting dexcom">
-        {{ form.dexcom_user.label }} {{ form.dexcom_user(size=40) }}
-        <br />
-        {{ form.dexcom_pass.label }} {{ form.dexcom_pass(size=40) }}
+  <form method="POST" action="{{ url_for('setup') }}" name="configForm">
+    <div class="block">{{ form.data_source.label}}</div>
+    <div>{{ form.data_source}}</div>
+    <div class="toggle dexcom">
+      <div class="block">{{ form.dexcom_user.label }}</div>
+      <div>{{ form.dexcom_user(size=40) }}</div>
+      <div class="block">{{ form.dexcom_pass.label }}</div>
+      <div>{{ form.dexcom_pass(size=40) }}</div>
     </div>
-    <div class="setting nightscout">
-        {{ form.ns_url.label }} {{ form.ns_url(size=200) }}
-        <br />
-        {{ form.ns_token.label }} {{ form.ns_token(size=40) }}
+    <div class="toggle nightscout">
+      <div class="block">{{ form.ns_url.label }}</div>
+      <div>{{ form.ns_url(size=200) }}</div>
+      <div class="block">{{ form.ns_token.label }}</div>
+      <div>{{ form.ns_token(size=40) }}</div>
     </div>
+    <div class="block">
+      {{ form.time24hour.label}} {{ form.time24hour}}
+    </div>
+    <div class="block" style="display: none;">
+      {{ form.unit.label}} {{ form.unit}}
+    </div>
+
     <br />
     <input type="submit" value="Save">
 
@@ -29,18 +35,19 @@
     <div class="flash">{{ message }}</div>
     {% endfor %}
 
-</form>
-<script>
+  </form>
+  <script>
     function setVisibility() {
-        source = document.configForm.data_source.value;
-        Array.from(document.getElementsByClassName("setting")).forEach(
-            function (element, index, array) {
-                element.style.display = (element.classList.contains(source)) ? 'block' : 'none';
-            })
+      source = document.configForm.data_source.value;
+      Array.from(document.getElementsByClassName("toggle")).forEach(
+        function (element, index, array) {
+          element.style.display = (element.classList.contains(source)) ? 'block' : 'none';
+        })
     }
 
     document.addEventListener('DOMContentLoaded', setVisibility, false);
     document.configForm.data_source.onchange = setVisibility
-</script>
+  </script>
 </body>
+
 </html>

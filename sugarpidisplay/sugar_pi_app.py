@@ -80,6 +80,7 @@ class SugarPiApp():
         else:
             from .twoline_display import TwolineDisplay
             self.glucoseDisplay = TwolineDisplay(self.logger)
+        self.glucoseDisplay.set_config(loadConfigDefaults())
         self.glucoseDisplay.open()
         self.glucoseDisplay.clear()
 
@@ -108,11 +109,11 @@ class SugarPiApp():
         self.logger.addHandler(handler)
 
     def __get_reader(self):
-        if (self.config["data_source"] == "dexcom"):
+        if (self.config[Cfg.data_source] == "dexcom"):
             self.logger.info('Loading dexcom reader')
             self.reader = DexcomReader(self.logger)
             return self.reader.set_config(self.config)
-        elif (self.config["data_source"] == "nightscout"):
+        elif (self.config[Cfg.data_source] == "nightscout"):
             self.logger.info('Loading nightscout reader')
             self.reader = NightscoutReader(self.logger)
             return self.reader.set_config(self.config)
@@ -121,7 +122,7 @@ class SugarPiApp():
             return False
 
     def __read_config(self):
-        self.config.update(loadConfigDefaults())
+        self.config.clear()
         try:
             f = open(os.path.join(self.pi_sugar_path, self.config_file), "r")
             configFromFile = json.load(f)
@@ -129,12 +130,12 @@ class SugarPiApp():
         except:
             self.logger.error("Error reading config file")
             return False
-        self.config.update(configFromFile)
-        if 'data_source' not in self.config:
+        if not validateConfig(configFromFile):
             self.logger.error('Invalid config values')
-            self.config.clear()
             return False
-
+        self.config.update(loadConfigDefaults())
+        self.config.update(configFromFile)
+        self.glucoseDisplay.set_config(self.config)
         self.logger.info("Loaded config")
         return True
 
@@ -220,7 +221,7 @@ class SugarPiApp():
         if len(self.LastReadings) > 0:
             self.glucoseDisplay.update(self.LastReadings)
 
-        if (self.config['use_animation']):
+        if (self.config[Cfg.use_animation]):
             self.glucoseDisplay.updateAnimation()
 
     def __getWifi(self, ctx):
