@@ -1,5 +1,6 @@
 import time
 from datetime import datetime, timedelta, timezone
+from os import uname, path
 
 try:
     import fcntl
@@ -40,10 +41,18 @@ def seconds_since(x):
 def get_stale_minutes():
     return 20
 
-
 def is_stale_reading(reading):
     readingAgeMins = get_reading_age_minutes(reading.timestamp)
     return readingAgeMins >= get_stale_minutes()
+
+def is_raspberry_pi():
+    unameResult = uname()
+    return "raspberry" in unameResult.nodename
+
+def get_font_path(ttf):
+    absFilePath = path.abspath(__file__)
+    dir = path.dirname(absFilePath)
+    return path.join(dir, ttf)
 
 
 class Reading():

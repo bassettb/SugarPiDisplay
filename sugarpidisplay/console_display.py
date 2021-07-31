@@ -8,13 +8,10 @@ from .utils import (Reading, get_reading_age_minutes, get_stale_minutes,
 class ConsoleDisplay:
     __logger = None
 
-    def __init__(self, logger):
+    def __init__(self, logger, config):
         self.__logger = logger
         self.LastScreenData = ScreenData()
         return None
-
-    def set_config(self, config):
-        return
 
     def open(self):
         return True

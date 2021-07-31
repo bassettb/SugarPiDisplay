@@ -4,14 +4,15 @@ from .utils import get_reading_age_minutes
 
 # screen dimensions
 gW = 122
-gH = 128
+gH = 122
 
-topMargin = 4
-botMargin = 4
+# margins allow for BG dots on the edges and for x-axis ticks
+topMargin = 1
+botMargin = 1
 leftMargin = 1
 rightMargin = 1
 # x is time, from -55 minutes to 0
-# y is BG, from 60-400
+# y is BG, from 60-300
 # xZero,yZero is in the bottom right corner
 maxBgVal = 300.0
 minBgVal = 60.0
