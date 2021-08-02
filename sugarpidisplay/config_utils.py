@@ -9,16 +9,20 @@ class Cfg():
     use_animation = 'use_animation'
     time_24hour = 'time_24hour'
     unit_mmol = 'unit_mmolL'
+    orientation = 'orientation'
 
 def loadConfigDefaults():
     configDefaults = {
         Cfg.use_animation: False,
         Cfg.time_24hour: False,
-        Cfg.unit_mmol: False
+        Cfg.unit_mmol: False,
+        Cfg.orientation: 0,
     }
     return configDefaults
 
 def validateConfig(config):
+    if config[Cfg.orientation] not in [0,90,180,270]:
+        config[Cfg.orientation] = 0
     if Cfg.data_source not in config:
         return False
     if (config[Cfg.data_source] == "dexcom"):

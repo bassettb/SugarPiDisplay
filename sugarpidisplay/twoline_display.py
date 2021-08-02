@@ -13,12 +13,9 @@ class TwolineDisplay:
     __port = 1
     __logger = None
 
-    def __init__(self, logger):
+    def __init__(self, logger, config):
         self.__logger = logger
         return None
-
-    def set_config(self, config):
-        return
 
     def open(self):
         addr = self.__find_device(self.__port)

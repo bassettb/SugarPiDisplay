@@ -48,6 +48,8 @@ class MyForm(FlaskForm):
         'Unit',
         choices=[(unit_mgperdL, 'mg/dL'), (unit_mmolperL, 'mmol/L')]
     )
+    orientation = SelectField('Screen Orientation (location of power cord)', coerce=int,
+        choices=[(0, '0° (left)'), (90, '90° (top)'), (180, '180° (right)'), (270, '270° (bottom)')])
 
     dexcom_user = StringField(
         'Dexcom UserName', validators=[dexcom_field_check])
@@ -87,6 +89,7 @@ def setup():
 def handle_submit(form):
     config = {Cfg.data_source: form.data_source.data}
     config[Cfg.time_24hour] = form.time24hour.data
+    config[Cfg.orientation] = form.orientation.data
     if (form.data_source.data == source_dexcom):
         config[Cfg.dex_user] = form.dexcom_user.data
         config[Cfg.dex_pass] = form.dexcom_pass.data
@@ -123,6 +126,7 @@ def loadData(form):
                 if (Cfg.ns_token in config):
                     form.ns_token.data = config[Cfg.ns_token]
         form.time24hour.data = config[Cfg.time_24hour]
+        form.orientation.data = config[Cfg.orientation]
         form.unit.data = unit_mgperdL
         if config[Cfg.unit_mmol]:
             form.unit.data = unit_mmolperL

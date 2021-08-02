@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-import http.client
 import json
 import logging
 import os
-import platform
 import signal
 import sys
 import threading
@@ -16,14 +14,14 @@ from pathlib import Path
 from .config_utils import *
 from .dexcom_reader import DexcomReader
 from .nightscout_reader import NightscoutReader
-from .utils import (Reading, get_ip_address, get_reading_age_minutes,
+from .utils import (Reading, get_ip_address, get_reading_age_minutes, is_raspberry_pi,
                     now_plus_seconds)
 
 
 class State(Enum):
     GetWifi = 1
     ShowWifi = 2
-    LoadConfig = 3
+    ConfigCheck = 3
     FirstLogin = 4
     ReLogin = 5
     ReadValues = 6
@@ -39,13 +37,13 @@ class SugarPiApp():
     ip_show_seconds = 4
     ip_show_seconds_pc_mode = 2
 
-    __args = {'debug_mode': False, 'pc_mode': False, 'epaper': False}
-
     logger = None
     config = {}
     glucoseDisplay = None
     reader = None
     LastReadings = []
+    badConfig = False
+    ip = ""
 
     def config_server_worker(self):
         from .sugarpiconfig import app
@@ -61,7 +59,9 @@ class SugarPiApp():
     def initialize(self):
         self.exit_event_handler = ExitEventHandler()
 
-        self.__parse_args()
+        self.modeNotRPi = is_raspberry_pi() == False
+        self.mode2line = ("2line" in sys.argv)
+        self.modeDebug = ("debug" in sys.argv)
 
         Path(self.pi_sugar_path).mkdir(exist_ok=True)
 
@@ -70,27 +70,23 @@ class SugarPiApp():
 
         self.start_config_server()
 
+        # read config
+        if (not self.__read_config() or not self.__get_reader()):
+            self.logger.error('error reading config file, using defaults')
+            self.badConfig = True
+
         #self.logger.info(platform.python_version())
-        if (self.__args['pc_mode']):
+        if (self.modeNotRPi):
             from .console_display import ConsoleDisplay
-            self.glucoseDisplay = ConsoleDisplay(self.logger)
-        elif (self.__args['epaper']):
-            from .epaper_display import EpaperDisplay
-            self.glucoseDisplay = EpaperDisplay(self.logger)
-        else:
+            self.glucoseDisplay = ConsoleDisplay(self.logger, self.config)
+        elif (self.mode2line):
             from .twoline_display import TwolineDisplay
-            self.glucoseDisplay = TwolineDisplay(self.logger)
-        self.glucoseDisplay.set_config(loadConfigDefaults())
+            self.glucoseDisplay = TwolineDisplay(self.logger, self.config)
+        else:
+            from .epaper_display import EpaperDisplay
+            self.glucoseDisplay = EpaperDisplay(self.logger, self.config)
         self.glucoseDisplay.open()
         self.glucoseDisplay.clear()
-
-    def __parse_args(self):
-        if ("debug" in sys.argv):
-            self.__args['debug_mode'] = True
-        if ("pc" in sys.argv):
-            self.__args['pc_mode'] = True
-        if ("epaper" in sys.argv):
-            self.__args['epaper'] = True
 
     def __init_logger(self):
         self.logger = logging.getLogger(__name__)
@@ -99,7 +95,7 @@ class SugarPiApp():
         handler = RotatingFileHandler(os.path.join(
             self.pi_sugar_path, self.LOG_FILENAME), maxBytes=131072, backupCount=10)
         handler.setLevel(logging.INFO)
-        if (self.__args['debug_mode']):
+        if (self.modeDebug):
             self.logger.setLevel(logging.DEBUG)
             handler.setLevel(logging.DEBUG)
 
@@ -123,6 +119,7 @@ class SugarPiApp():
 
     def __read_config(self):
         self.config.clear()
+        self.config.update(loadConfigDefaults())
         try:
             f = open(os.path.join(self.pi_sugar_path, self.config_file), "r")
             configFromFile = json.load(f)
@@ -133,9 +130,7 @@ class SugarPiApp():
         if not validateConfig(configFromFile):
             self.logger.error('Invalid config values')
             return False
-        self.config.update(loadConfigDefaults())
         self.config.update(configFromFile)
-        self.glucoseDisplay.set_config(self.config)
         self.logger.info("Loaded config")
         return True
 
@@ -180,8 +175,8 @@ class SugarPiApp():
 
     def run(self):
         ctx = SugarPiApp.StateManager()
-        if (self.__args['pc_mode']):
-            ctx.setNextState(State.LoadConfig)
+        if self.modeNotRPi:
+            ctx.setNextState(State.ConfigCheck)
         else:
             ctx.setNextState(State.GetWifi)
         ctx.setNextRunDelaySeconds(0)
@@ -207,8 +202,8 @@ class SugarPiApp():
             stateFunc = self.__getWifi
         elif (ctx.CurrentState == State.ShowWifi):
             stateFunc = self.__showWifi
-        elif (ctx.CurrentState == State.LoadConfig):
-            stateFunc = self.__runLoadConfig
+        elif (ctx.CurrentState == State.ConfigCheck):
+            stateFunc = self.__runConfigCheck
         elif (ctx.CurrentState == State.FirstLogin):
             stateFunc = self.__runFirstLogin
         elif (ctx.CurrentState == State.ReLogin):
@@ -226,29 +221,26 @@ class SugarPiApp():
 
     def __getWifi(self, ctx):
         self.glucoseDisplay.show_centered(logging.DEBUG, "Waiting", "Wifi")
-        ip = get_ip_address('wlan0')
-        if (ip == ""):
+        self.ip = get_ip_address('wlan0')
+        if (self.ip == ""):
             ctx.setNextRunDelaySeconds(1)
         else:
             ctx.setNextState(State.ShowWifi)
 
     def __showWifi(self, ctx):
         if (ctx.IsNewState):
-            ip = get_ip_address('wlan0')
-            self.logger.info("Wifi IP: " + ip)
-            self.glucoseDisplay.show_centered(logging.INFO, ip, "")
-            seconds = self.ip_show_seconds_pc_mode if self.__args['pc_mode'] else self.ip_show_seconds
+            self.logger.info("Wifi IP: " + self.ip)
+            self.glucoseDisplay.show_centered(logging.INFO, self.ip, "")
+            seconds = self.ip_show_seconds_pc_mode if self.modeNotRPi else self.ip_show_seconds
             ctx.setRunDuration(seconds)
             return
         if (ctx.isRunDurationOver()):
-            ctx.setNextState(State.LoadConfig)
+            ctx.setNextState(State.ConfigCheck)
 
-    def __runLoadConfig(self, ctx):
-        self.glucoseDisplay.show_centered(logging.DEBUG, "Loading", "Config")
-        if (not self.__read_config() or not self.__get_reader()):
-            self.glucoseDisplay.show_centered(
-                logging.WARNING, "Invalid Config", "Will Retry")
-            ctx.setNextRunDelaySeconds(5)
+    def __runConfigCheck(self, ctx):
+        if self.badConfig:
+            self.glucoseDisplay.show_centered(logging.ERROR, "Fix Config", self.ip)
+            ctx.setNextRunDelaySeconds(300)
             return
         ctx.setNextState(State.FirstLogin)
 

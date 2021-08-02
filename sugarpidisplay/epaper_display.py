@@ -1,7 +1,4 @@
 import logging
-import os
-import time
-import traceback
 from datetime import datetime, timezone
 from PIL import Image, ImageDraw, ImageFont
 
@@ -10,58 +7,64 @@ import sugarpidisplay.epd2in13_V2 as epd2in13
 from .config_utils import Cfg
 from .graph import drawGraph
 from .trend import Trend
-from .utils import get_reading_age_minutes, get_stale_minutes, seconds_since
+from .utils import get_reading_age_minutes, get_stale_minutes, seconds_since, get_font_path
 
 minLogLevel = logging.INFO
 idleRefreshSeconds = 330
 EPD_WIDTH       = 122
 EPD_HEIGHT      = 250
+# EPD defaults to what I'm calling 0° for portrait and 270° for landscape
 
 class EpaperDisplay:
-    __config = {}
     __epd = None
-    __screenMode = ""
-    __logger = None
-    __hPortraitImage = None
-    __hLandscapeImage = None
 
-    __dirty = False
-
-    __lastScreenData = None
     __arrowImgSingle = None
     __arrowImgDouble = None
 
-    def __init__(self, logger):
+    def __init__(self, logger, config):
         self.__logger = logger
-        self.__hPortraitImage = Image.new(
-            '1', (EPD_WIDTH, EPD_HEIGHT), 255)   # 122x250
-        self.__hLandscapeImage = Image.new(
-            '1', (EPD_HEIGHT, EPD_WIDTH), 255)   # 250x122
+        self.__screenMode = ""
+        self.__dirty = False
 
-        self.__bgPanel = Panel((0, 0), (122, 70))
-        self.__agePanel = Panel((0, 70), (70, 52))
-        self.__trendPanel = Panel((70, 70), (52, 52))
-        self.__graphPanel = Panel((0, 122), (122, 128))
+        self.__config = {}
+        self.__config[Cfg.time_24hour] = config[Cfg.time_24hour]
+        self.__config[Cfg.orientation] = config[Cfg.orientation]
+
+        # TextModeImage is used to display banner text on startup.  Always landscape
+        self.__hTextModeImage = Image.new(
+            '1', (EPD_HEIGHT, EPD_WIDTH), 255)   # Landscape 250x122
         self.__bannerPanel = Panel(
             (0, 0), (EPD_HEIGHT, EPD_WIDTH))
+
+        # Blood glucose display screen
+        if self.__config[Cfg.orientation] in [0,180]:
+            self.__hGlucoseModeImage = Image.new(
+                '1', (EPD_WIDTH, EPD_HEIGHT), 255)   # Portrait 122x250
+            self.__bgPanel = Panel((0, 0), (122, 70))
+            self.__agePanel = Panel((0, 70), (70, 52))
+            self.__trendPanel = Panel((70, 70), (52, 52))
+            self.__graphPanel = Panel((0, 125), (122, 122))
+        else:
+            self.__hGlucoseModeImage = Image.new(
+                '1', (EPD_HEIGHT, EPD_WIDTH), 255)   # Landscape 250x122
+            self.__bgPanel = Panel((0, 0), (122, 70))
+            self.__agePanel = Panel((0, 70), (70, 52))
+            self.__trendPanel = Panel((70, 70), (52, 52))
+            self.__graphPanel = Panel((125, 0), (122, 122))
 
         self.__allPanels = [self.__bgPanel, self.__agePanel,
                             self.__trendPanel, self.__graphPanel, self.__bannerPanel]
 
-        absFilePath = os.path.abspath(__file__)
-        dir = os.path.dirname(absFilePath)
-        fontPath = os.path.join(dir, 'Inconsolata-Regular.ttf')
+        self.__initTrendImages(self.__trendPanel.size)
+
+        fontPath = get_font_path('Inconsolata-Regular.ttf')
         self.__fontMsg = ImageFont.truetype(fontPath, 30)
         self.__fontBG = ImageFont.truetype(fontPath, 74)
         self.__fontAge = ImageFont.truetype(fontPath, 22)
         self.__fontTime = ImageFont.truetype(fontPath, 18)
 
-        self.__initTrendImages(self.__trendPanel.size)
         self.__lastScreenData = ScreenData()
         return None
-
-    def set_config(self, config):
-        self.__config[Cfg.time_24hour] = config[Cfg.time_24hour]
 
     def open(self):
         self.__epd = epd2in13.EPD()
@@ -80,25 +83,29 @@ class EpaperDisplay:
             return
         self.__dirty = False
         if self.__screenMode == "egv":
-            self.__wipeImage(self.__hPortraitImage)
-            self.__hPortraitImage.paste(
+            self.__wipeImage(self.__hGlucoseModeImage)
+            self.__hGlucoseModeImage.paste(
                 self.__bgPanel.image, self.__bgPanel.xy)
-            self.__hPortraitImage.paste(
+            self.__hGlucoseModeImage.paste(
                 self.__agePanel.image, self.__agePanel.xy)
-            self.__hPortraitImage.paste(
+            self.__hGlucoseModeImage.paste(
                 self.__trendPanel.image, self.__trendPanel.xy)
-            self.__hPortraitImage.paste(
+            self.__hGlucoseModeImage.paste(
                 self.__graphPanel.image, self.__graphPanel.xy)
 
+            rotatedImg = self.__hGlucoseModeImage.rotate(180 * (1 if self.__config[Cfg.orientation] in [90,180] else 0))
             self.__epd.init(self.__epd.FULL_UPDATE)
-            self.__epd.display(self.__epd.getbuffer(self.__hPortraitImage))
+            self.__epd.display(self.__epd.getbuffer(rotatedImg))
             self.__epd.sleep()
+
         if self.__screenMode == "text":
-            self.__wipeImage(self.__hLandscapeImage)
-            self.__hLandscapeImage.paste(
+            self.__wipeImage(self.__hTextModeImage)
+            self.__hTextModeImage.paste(
                 self.__bannerPanel.image, self.__bannerPanel.xy)
+
+            rotatedImg = self.__hTextModeImage.rotate(180 * (1 if self.__config[Cfg.orientation]==90 else 0))
             self.__epd.init(self.__epd.FULL_UPDATE)
-            self.__epd.display(self.__epd.getbuffer(self.__hLandscapeImage))
+            self.__epd.display(self.__epd.getbuffer(rotatedImg))
             self.__epd.sleep()
 
     def __wipeImage(self, img):
@@ -119,8 +126,8 @@ class EpaperDisplay:
         self.__epd.sleep()
         for panel in self.__allPanels:
             self.__wipePanel(panel)
-        self.__wipeImage(self.__hPortraitImage)
-        self.__wipeImage(self.__hLandscapeImage)
+        self.__wipeImage(self.__hGlucoseModeImage)
+        self.__wipeImage(self.__hTextModeImage)
         self.__screenMode = ""
 
     def show_centered(self, logLevel, line0, line1):
