@@ -21,7 +21,7 @@ def loadConfigDefaults():
     return configDefaults
 
 def validateConfig(config):
-    if config[Cfg.orientation] not in [0,90,180,270]:
+    if Cfg.orientation not in config or config[Cfg.orientation] not in [0,90,180,270]:
         config[Cfg.orientation] = 0
     if Cfg.data_source not in config:
         return False
