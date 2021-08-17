@@ -59,7 +59,7 @@ class SugarPiApp():
     def initialize(self):
         self.exit_event_handler = ExitEventHandler()
 
-        self.modeNotRPi = is_raspberry_pi() == False
+        self.modeNotRPi = False # is_raspberry_pi() == False
         self.mode2line = ("2line" in sys.argv)
         self.modeDebug = ("debug" in sys.argv)
 
