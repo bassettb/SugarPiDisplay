@@ -4,6 +4,10 @@ from RPLCD.i2c import CharLCD
 from .trend import Trend
 from .utils import Reading, get_reading_age_minutes, is_stale_reading
 
+# This was the original display format.  It has been replaced by the e-paper display
+# Leaving this code here for historical/educational reasons
+# To use it, you need to install smbus:
+# sudo apt-get install python3-smbus
 
 class TwolineDisplay:
     __lcd = None
@@ -62,7 +66,7 @@ class TwolineDisplay:
             self.__lcd.cursor_pos = (1, 0)
             self.__lcd.write_string(line1.center(16))
 
-    def update(self, readings: [Reading]):
+    def update(self, readings):
         reading = readings[0]
         self.__setScreenModeToEgv()
         isStale = is_stale_reading(reading)

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='sugarpidisplay',
-    version='0.12',
+    version='0.13',
     description='Display your CGM data on a tiny LCD or epaper screen',
     url='https://github.com/bassettb/SugarPiDisplay',
     author='Bryan Bassett',
@@ -14,9 +14,6 @@ setup(
         'Pillow',
         'spidev',
         'RPi.GPIO'
-        # only for 2-line display
-        # 'smbus',
-        # 'RPLCD'
     ],
     zip_safe=False
 )

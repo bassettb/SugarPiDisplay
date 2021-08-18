@@ -60,7 +60,6 @@ class SugarPiApp():
         self.exit_event_handler = ExitEventHandler()
 
         self.modeNotRPi = False # is_raspberry_pi() == False
-        self.mode2line = ("2line" in sys.argv)
         self.modeDebug = ("debug" in sys.argv)
 
         Path(self.pi_sugar_path).mkdir(exist_ok=True)
@@ -79,9 +78,6 @@ class SugarPiApp():
         if (self.modeNotRPi):
             from .console_display import ConsoleDisplay
             self.glucoseDisplay = ConsoleDisplay(self.logger, self.config)
-        elif (self.mode2line):
-            from .twoline_display import TwolineDisplay
-            self.glucoseDisplay = TwolineDisplay(self.logger, self.config)
         else:
             from .epaper_display import EpaperDisplay
             self.glucoseDisplay = EpaperDisplay(self.logger, self.config)
