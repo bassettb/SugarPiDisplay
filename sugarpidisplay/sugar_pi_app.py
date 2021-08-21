@@ -14,7 +14,7 @@ from pathlib import Path
 from .config_utils import *
 from .dexcom_reader import DexcomReader
 from .nightscout_reader import NightscoutReader
-from .utils import (Reading, get_ip_address, get_reading_age_minutes, is_raspberry_pi,
+from .utils import (Reading, get_ip_address, get_reading_age_minutes,
                     now_plus_seconds)
 
 
@@ -59,13 +59,18 @@ class SugarPiApp():
     def initialize(self):
         self.exit_event_handler = ExitEventHandler()
 
-        self.modeNotRPi = False # is_raspberry_pi() == False
+        self.modeNotRPi = ("notpi" in sys.argv)
         self.modeDebug = ("debug" in sys.argv)
 
         Path(self.pi_sugar_path).mkdir(exist_ok=True)
 
         self.__init_logger()
         self.logger.info("Application Start")
+
+        if self.modeNotRPi:
+            self.logger.info("mode notpi set")
+        if self.modeDebug:
+            self.logger.info("mode debug set")
 
         self.start_config_server()
 
@@ -78,9 +83,11 @@ class SugarPiApp():
         if (self.modeNotRPi):
             from .console_display import ConsoleDisplay
             self.glucoseDisplay = ConsoleDisplay(self.logger, self.config)
+            self.logger.info("ConsoleDisplay loaded")
         else:
             from .epaper_display import EpaperDisplay
             self.glucoseDisplay = EpaperDisplay(self.logger, self.config)
+            self.logger.info("EpaperDisplay loaded")
         self.glucoseDisplay.open()
         self.glucoseDisplay.clear()
 

@@ -23,7 +23,6 @@
 ### Installing SugarPiDisplay
 - ``git clone https://github.com/bassettb/SugarPiDisplay.git``
 - ``pip3 install SugarPiDisplay/``
-- ``chmod 755 SugarPiDisplay/install.sh``
 - ``SugarPiDisplay/install.sh``
 - reboot the Raspberry Pi and SugarPiDisplay should be running
 

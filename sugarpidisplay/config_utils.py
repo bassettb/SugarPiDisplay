@@ -21,8 +21,10 @@ def loadConfigDefaults():
     return configDefaults
 
 def validateConfig(config):
-    if Cfg.orientation not in config or config[Cfg.orientation] not in [0,90,180,270]:
+    # If orientation is invalid, use the default
+    if Cfg.orientation in config and config[Cfg.orientation] not in [0,90,180,270]:
         config[Cfg.orientation] = 0
+
     if Cfg.data_source not in config:
         return False
     if (config[Cfg.data_source] == "dexcom"):
