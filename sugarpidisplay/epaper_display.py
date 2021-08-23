@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timezone
 from PIL import Image, ImageDraw, ImageFont
 
-import sugarpidisplay.epd2in13_V2 as epd2in13
+# from .epd2in13_V2 import epd2in13
 
 from .config_utils import Cfg
 from .graph import drawGraph
@@ -21,7 +21,13 @@ class EpaperDisplay:
     __arrowImgSingle = None
     __arrowImgDouble = None
 
-    def __init__(self, logger, config):
+    def __init__(self, logger, config, epd):
+
+        self.__epd = epd
+        if self.__epd is None:
+            from .epd2in13_V2 import epd2in13
+            self.__epd = epd2in13.EPD()
+
         self.__logger = logger
         self.__screenMode = ""
         self.__dirty = False
@@ -48,7 +54,7 @@ class EpaperDisplay:
         return None
 
     def open(self):
-        self.__epd = epd2in13.EPD()
+        # self.__epd = epd2in13.EPD()
         #self.__create_custom_chars()
         return True
 
@@ -166,7 +172,7 @@ class EpaperDisplay:
         line0 = line0 if line0 is not None else ""
         line1 = line1 if line1 is not None else ""
 
-        self.__logger.debug("Display: " + line0 + " || " + line1)
+        # self.__logger.debug("Display: " + line0 + " || " + line1)
         print("Display: " + line0 + " || " + line1)
 
         self.__wipePanel(self.__bannerPanel)
@@ -272,13 +278,13 @@ class EpaperDisplay:
 
     def __setScreenModeToEgv(self):
         if (not self.__screenMode == "egv"):
-            self.__logger.debug("Display mode EGV")
+            # self.__logger.debug("Display mode EGV")
             self.__screenMode = "egv"
             self.__lastScreenData = ScreenData()
 
     def __setScreenModeToText(self):
         if (not self.__screenMode == "text"):
-            self.__logger.debug("Display mode Text")
+            # self.__logger.debug("Display mode Text")
             self.__screenMode = "text"
 
     def __initTrendImages(self, size):

@@ -80,14 +80,7 @@ class SugarPiApp():
             self.badConfig = True
 
         #self.logger.info(platform.python_version())
-        if (self.modeNotRPi):
-            from .console_display import ConsoleDisplay
-            self.glucoseDisplay = ConsoleDisplay(self.logger, self.config)
-            self.logger.info("ConsoleDisplay loaded")
-        else:
-            from .epaper_display import EpaperDisplay
-            self.glucoseDisplay = EpaperDisplay(self.logger, self.config)
-            self.logger.info("EpaperDisplay loaded")
+        self.__loadDisplay()
         self.glucoseDisplay.open()
         self.glucoseDisplay.clear()
 
@@ -291,6 +284,20 @@ class SugarPiApp():
             return 15
         # We shouldn't get here.  A non-new reading should be older than 5 minutes
         return 60
+
+    def __loadDisplay(self):
+        epd = None
+        if self.modeNotRPi:
+            from .epd_dev import EPD_Dev
+            self.logger.info("using EPD_dev")
+            epd = EPD_Dev()
+
+        from .epaper_display import EpaperDisplay
+        self.glucoseDisplay = EpaperDisplay(self.logger, self.config, epd)
+        self.logger.info("EpaperDisplay loaded")
+        #     from .console_display import ConsoleDisplay
+        #     self.glucoseDisplay = ConsoleDisplay(self.logger, self.config)
+        #     self.logger.info("ConsoleDisplay loaded")
 
 
 class ExitEventHandler:
