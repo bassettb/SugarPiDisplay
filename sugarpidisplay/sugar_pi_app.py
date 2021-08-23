@@ -11,7 +11,7 @@ from enum import Enum
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from .config_utils import *
+from .config_utils import Cfg, read_config
 from .dexcom_reader import DexcomReader
 from .nightscout_reader import NightscoutReader
 from .utils import (Reading, get_ip_address, get_reading_age_minutes,
@@ -121,21 +121,8 @@ class SugarPiApp():
             return False
 
     def __read_config(self):
-        self.config.clear()
-        self.config.update(loadConfigDefaults())
-        try:
-            f = open(os.path.join(self.pi_sugar_path, self.config_file), "r")
-            configFromFile = json.load(f)
-            f.close()
-        except:
-            self.logger.error("Error reading config file")
-            return False
-        if not validateConfig(configFromFile):
-            self.logger.error('Invalid config values')
-            return False
-        self.config.update(configFromFile)
-        self.logger.info("Loaded config")
-        return True
+        configPath = os.path.join(self.pi_sugar_path, self.config_file)
+        return read_config(self.config, configPath, self.logger)
 
     class StateManager:
         __NextRunTime = None

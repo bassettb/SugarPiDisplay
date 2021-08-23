@@ -9,7 +9,7 @@ from flask import Flask, flash, redirect, render_template, request
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, PasswordField, SelectField, StringField
 from wtforms.validators import InputRequired, ValidationError
-from ..config_utils import Cfg
+from ..config_utils import Cfg, read_config
 from . import app
 
 source_dexcom = 'dexcom'
@@ -110,12 +110,10 @@ def handle_submit(form):
 
 def loadData(form):
     config_full_path = os.path.join(pi_sugar_path, config_file)
-    if (not Path(config_full_path).exists()):
-        return
+    config = {}
     try:
-        f = open(config_full_path, "r")
-        config = json.load(f)
-        f.close()
+        read_config(config, config_full_path, None)
+
         if (Cfg.data_source in config):
             form.data_source.data = config[Cfg.data_source]
             if (config[Cfg.data_source] == source_dexcom):

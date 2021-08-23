@@ -73,7 +73,7 @@ class EpaperDisplay:
                 '1', (EPD_HEIGHT, EPD_WIDTH), 255)   # Landscape 250x122
 
         if self.__config[Cfg.show_graph]:
-            self.__fontBG = ImageFont.truetype(fontPath, 76)
+            self.__fontBG = ImageFont.truetype(fontPath, 74)
             bgPanelSize = (122, 70)
             agePanelSize = (70, 52)
             trendPanelSize = (52, 52)
