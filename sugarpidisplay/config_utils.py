@@ -10,6 +10,7 @@ class Cfg():
     time_24hour = 'time_24hour'
     unit_mmol = 'unit_mmolL'
     orientation = 'orientation'
+    show_graph = 'show_graph'
 
 def loadConfigDefaults():
     configDefaults = {
@@ -17,6 +18,7 @@ def loadConfigDefaults():
         Cfg.time_24hour: False,
         Cfg.unit_mmol: False,
         Cfg.orientation: 0,
+        Cfg.show_graph: True,
     }
     return configDefaults
 
