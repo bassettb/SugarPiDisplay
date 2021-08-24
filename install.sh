@@ -1,9 +1,6 @@
 #!/bin/bash
 
 cd $HOME/SugarPiDisplay
-chmod 755 sugarpidisplay.sh
-chmod 755 network-check.sh
-chmod 755 network-check.cron
 
 sudo cp -f network-check.cron /etc/cron.d/network-check
 
