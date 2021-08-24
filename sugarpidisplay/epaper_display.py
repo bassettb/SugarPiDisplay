@@ -25,10 +25,12 @@ class EpaperDisplay:
         self.__logger = logger
         self.__screenMode = ""
         self.__dirty = False
+        fontPath = get_font_path('Inconsolata-Regular.ttf')
 
         self.__config = {}
         self.__config[Cfg.time_24hour] = config[Cfg.time_24hour]
         self.__config[Cfg.orientation] = config[Cfg.orientation]
+        self.__config[Cfg.show_graph] = config[Cfg.show_graph]
 
         # TextModeImage is used to display banner text on startup.  Always landscape
         self.__hTextModeImage = Image.new(
@@ -36,32 +38,11 @@ class EpaperDisplay:
         self.__bannerPanel = Panel(
             (0, 0), (EPD_HEIGHT, EPD_WIDTH))
 
-        # Blood glucose display screen
-        if self.__config[Cfg.orientation] in [0,180]:
-            self.__hGlucoseModeImage = Image.new(
-                '1', (EPD_WIDTH, EPD_HEIGHT), 255)   # Portrait 122x250
-            self.__bgPanel = Panel((0, 0), (122, 70))
-            self.__agePanel = Panel((0, 70), (70, 52))
-            self.__trendPanel = Panel((70, 70), (52, 52))
-            self.__graphPanel = Panel((0, 125), (122, 122))
-        else:
-            self.__hGlucoseModeImage = Image.new(
-                '1', (EPD_HEIGHT, EPD_WIDTH), 255)   # Landscape 250x122
-            self.__bgPanel = Panel((0, 0), (122, 70))
-            self.__agePanel = Panel((0, 70), (70, 52))
-            self.__trendPanel = Panel((70, 70), (52, 52))
-            self.__graphPanel = Panel((125, 0), (122, 122))
+        self.__allPanels = [self.__bannerPanel]
 
-        self.__allPanels = [self.__bgPanel, self.__agePanel,
-                            self.__trendPanel, self.__graphPanel, self.__bannerPanel]
+        self.define_glucose_layout(fontPath)
 
         self.__initTrendImages(self.__trendPanel.size)
-
-        fontPath = get_font_path('Inconsolata-Regular.ttf')
-        self.__fontMsg = ImageFont.truetype(fontPath, 30)
-        self.__fontBG = ImageFont.truetype(fontPath, 74)
-        self.__fontAge = ImageFont.truetype(fontPath, 22)
-        self.__fontTime = ImageFont.truetype(fontPath, 18)
 
         self.__lastScreenData = ScreenData()
         return None
@@ -78,6 +59,53 @@ class EpaperDisplay:
         self.__epd = None
         return True
 
+    def define_glucose_layout(self, fontPath):
+
+        self.__fontMsg = ImageFont.truetype(fontPath, 30)
+        self.__fontAge = ImageFont.truetype(fontPath, 22)
+        self.__fontTime = ImageFont.truetype(fontPath, 18)
+        # Blood glucose display screen
+        if self.__config[Cfg.orientation] in [0,180]:
+            self.__hGlucoseModeImage = Image.new(
+                '1', (EPD_WIDTH, EPD_HEIGHT), 255)   # Portrait 122x250
+        else:
+            self.__hGlucoseModeImage = Image.new(
+                '1', (EPD_HEIGHT, EPD_WIDTH), 255)   # Landscape 250x122
+
+        if self.__config[Cfg.show_graph]:
+            self.__fontBG = ImageFont.truetype(fontPath, 74)
+            bgPanelSize = (122, 70)
+            agePanelSize = (70, 52)
+            trendPanelSize = (52, 52)
+            graphPanelSize = (122, 122)
+            if self.__config[Cfg.orientation] in [0,180]:
+                self.__bgPanel = Panel((0, 0), bgPanelSize)
+                self.__agePanel = Panel((0, 70), agePanelSize)
+                self.__trendPanel = Panel((70, 70), trendPanelSize)
+                self.__graphPanel = Panel((0, 125), graphPanelSize)
+            else:
+                self.__bgPanel = Panel((0, 0), bgPanelSize)
+                self.__agePanel = Panel((0, 70), agePanelSize)
+                self.__trendPanel = Panel((70, 70), trendPanelSize)
+                self.__graphPanel = Panel((125, 0), graphPanelSize)
+            self.__allPanels.extend([self.__bgPanel, self.__agePanel, self.__trendPanel, self.__graphPanel])
+        else:
+            agePanelSize = (70, 45)
+            trendPanelSize = (70, 70)
+            if self.__config[Cfg.orientation] in [0,180]:
+                self.__fontBG = ImageFont.truetype(fontPath, 76)
+                bgPanelSize = (122, 70)
+                self.__bgPanel = Panel((0, 26), bgPanelSize)
+                self.__trendPanel = Panel((26, 125), trendPanelSize)
+                self.__agePanel = Panel((26, 205), agePanelSize)
+            else:
+                self.__fontBG = ImageFont.truetype(fontPath, 114)
+                bgPanelSize = (180, 90)
+                self.__bgPanel = Panel((0, 16), bgPanelSize)
+                self.__trendPanel = Panel((180, 0), trendPanelSize)
+                self.__agePanel = Panel((180, 80), agePanelSize)
+            self.__allPanels.extend([self.__bgPanel, self.__agePanel, self.__trendPanel])
+
     def __drawScreen(self):
         if (not self.__dirty):
             return
@@ -90,8 +118,9 @@ class EpaperDisplay:
                 self.__agePanel.image, self.__agePanel.xy)
             self.__hGlucoseModeImage.paste(
                 self.__trendPanel.image, self.__trendPanel.xy)
-            self.__hGlucoseModeImage.paste(
-                self.__graphPanel.image, self.__graphPanel.xy)
+            if self.__config[Cfg.show_graph]:
+                self.__hGlucoseModeImage.paste(
+                    self.__graphPanel.image, self.__graphPanel.xy)
 
             rotatedImg = self.__hGlucoseModeImage.rotate(180 * (1 if self.__config[Cfg.orientation] in [90,180] else 0))
             self.__epd.init(self.__epd.FULL_UPDATE)
@@ -113,8 +142,8 @@ class EpaperDisplay:
             return
         draw = ImageDraw.Draw(img)
         draw.rectangle(((0, 0), img.size), fill=(255))
-        #size = (img.size[0]-1, img.size[1]-1)
-        #draw.rectangle(((0,0), size), outline = (0), fill = (255) )
+        # size = (img.size[0]-1, img.size[1]-1)
+        # draw.rectangle(((0,0), size), outline = (0), fill = (255) )
 
     def __wipePanel(self, panel):
         self.__wipeImage(panel.image)
@@ -162,7 +191,8 @@ class EpaperDisplay:
         self.__update_trend(newScreenData.Trend)
         #self.__update_age(newScreenData.ReadingTime, newScreenData.Age)
         self.__update_clock(newScreenData.UpdateTime)
-        self.__update_graph(readings)
+        if self.__config[Cfg.show_graph]:
+            self.__update_graph(readings)
 
         self.__dirty = True
         self.__lastScreenData = newScreenData
@@ -197,6 +227,11 @@ class EpaperDisplay:
         arrowImg = self.__get_trend_image(trend)
         if (arrowImg is not None):
             self.__trendPanel.image.paste(arrowImg, (0, 0))
+
+        # img = self.__trendPanel.image
+        # draw = ImageDraw.Draw(img)
+        # size = (img.size[0]-1, img.size[1]-1)
+        # draw.rectangle(((0,0), size), outline = (0), fill = (255) )
 
     #def __update_age(self, timestamp, age):
         #mins = (mins//2) * 2 # round to even number
@@ -251,7 +286,8 @@ class EpaperDisplay:
         h = size[1]
         x2 = w - 1
         #y2 = h - 1
-        lw = 3
+        # TODO - consider lw in the math below
+        lw = 5
         self.__arrowImgSingle = Image.new('1', size, 255)
         draw = ImageDraw.Draw(self.__arrowImgSingle)
         aw = w//4
