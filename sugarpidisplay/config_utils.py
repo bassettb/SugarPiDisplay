@@ -35,7 +35,6 @@ def read_config(config, configPath, logger):
     except:
         if logger is not None:
             logger.error("Error reading config file")
-        return False
     fill_config_gaps(config)
     if not validateConfig(config):
         if logger is not None:
