@@ -2,8 +2,8 @@
 ## Software Setup
 
 ### Install Raspian OS
-- Flash the microSD with Raspian-Lite
-- If possible, follow the steps for a [headless config](https://www.raspberrypi.org/documentation/configuration/wireless/headless.md), which involves placing a ``wpa_supplicat.conf`` file and a file named ``ssh`` in the root of the flashed SDCard.
+- Flash the microSD with Raspbian-Lite
+- If possible, follow the steps for a [headless config](https://www.raspberrypi.org/documentation/configuration/wireless/headless.md), which involves placing a [``wpa_supplicant.conf``](https://www.raspberrypi.org/documentation/computers/configuration.html#adding-the-network-details-to-your-raspberry-pi) file and a file named ``ssh`` in the root of the flashed SDCard.
 - Place the microSD in the Pi and power it on
 
 ### Configuring Raspberry Pi
@@ -12,7 +12,7 @@
 - ``sudo raspi-config``
   - configure wifi, including country (skip if you did headless config)
   - enable ssh (skip if you did headless config)
-  - enable SPI
+  - enable SPI (Display settings)
   - set localization (timezone, language, keyboard.  The default GB keyboard layout will be a problem if your wifi password has any symbols)
 
 ### Installing Dependencies
