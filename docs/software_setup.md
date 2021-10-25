@@ -21,6 +21,7 @@
 - ``sudo apt-get install git``
 
 ### Installing SugarPiDisplay
+- ``cd ~/``
 - ``git clone https://github.com/bassettb/SugarPiDisplay.git``
 - ``pip3 install SugarPiDisplay/``
 - ``SugarPiDisplay/install.sh``
