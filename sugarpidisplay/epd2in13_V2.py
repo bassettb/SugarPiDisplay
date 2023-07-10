@@ -29,16 +29,16 @@
 
 # Downloaded from:
 # https://github.com/waveshare/e-Paper/tree/master/RaspberryPi_JetsonNano/python/lib/waveshare_epd
-# removed import of numpy
-# ignore Waveshare's Dev_exit "hack"
+# added a default value for the init() update parameter
 
 import logging
 from .epdconfig import epdconfig
-#import numpy as np
 
 # Display resolution
 EPD_WIDTH       = 122
 EPD_HEIGHT      = 250
+
+logger = logging.getLogger(__name__)
 
 class EPD:
     def __init__(self):
@@ -92,7 +92,7 @@ class EPD:
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200) 
         epdconfig.digital_write(self.reset_pin, 0)
-        epdconfig.delay_ms(10)
+        epdconfig.delay_ms(5)
         epdconfig.digital_write(self.reset_pin, 1)
         epdconfig.delay_ms(200)   
 
@@ -106,6 +106,13 @@ class EPD:
         epdconfig.digital_write(self.dc_pin, 1)
         epdconfig.digital_write(self.cs_pin, 0)
         epdconfig.spi_writebyte([data])
+        epdconfig.digital_write(self.cs_pin, 1)
+
+    # send a lot of data   
+    def send_data2(self, data):
+        epdconfig.digital_write(self.dc_pin, 1)
+        epdconfig.digital_write(self.cs_pin, 0)
+        epdconfig.spi_writebyte2(data)
         epdconfig.digital_write(self.cs_pin, 1)
         
     def ReadBusy(self):
@@ -124,7 +131,7 @@ class EPD:
         self.send_command(0x20)        
         self.ReadBusy()
         
-    def init(self, update):
+    def init(self, update=FULL_UPDATE):
         if (epdconfig.module_init() != 0):
             return -1
         # EPD hardware init start
@@ -226,14 +233,14 @@ class EPD:
         pixels = image_monocolor.load()
         
         if(imwidth == self.width and imheight == self.height):
-            logging.debug("Vertical")
+            logger.debug("Vertical")
             for y in range(imheight):
                 for x in range(imwidth):                    
                     if pixels[x, y] == 0:
                         x = imwidth - x
                         buf[int(x / 8) + y * linewidth] &= ~(0x80 >> (x % 8))
         elif(imwidth == self.height and imheight == self.width):
-            logging.debug("Horizontal")
+            logger.debug("Horizontal")
             for y in range(imheight):
                 for x in range(imwidth):
                     newx = y
@@ -245,15 +252,8 @@ class EPD:
         
         
     def display(self, image):
-        if self.width%8 == 0:
-            linewidth = int(self.width/8)
-        else:
-            linewidth = int(self.width/8) + 1
-
         self.send_command(0x24)
-        for j in range(0, self.height):
-            for i in range(0, linewidth):
-                self.send_data(image[i + j * linewidth])   
+        self.send_data2(image)   
         self.TurnOnDisplay()
         
     def displayPartial(self, image):
@@ -262,47 +262,47 @@ class EPD:
         else:
             linewidth = int(self.width/8) + 1
 
-        self.send_command(0x24)
+        buf = [0x00] * self.height * linewidth
         for j in range(0, self.height):
             for i in range(0, linewidth):
-                self.send_data(image[i + j * linewidth])   
+                buf[i + j * linewidth] = ~image[i + j * linewidth]
+
+        self.send_command(0x24)
+        self.send_data2(image)   
                 
+                
+        self.send_command(0x26)
+        self.send_data2(buf)  
+        self.TurnOnDisplayPart()
+
+    def displayPartBaseImage(self, image):
+        self.send_command(0x24)
+        self.send_data2(image)   
+                
+        self.send_command(0x26)
+        self.send_data2(image)  
+        self.TurnOnDisplay()
+    
+    def Clear(self, color=0xFF):
+        if self.width%8 == 0:
+            linewidth = int(self.width/8)
+        else:
+            linewidth = int(self.width/8) + 1
+        # logger.debug(linewidth)
+        
+        buf = [0x00] * self.height * linewidth
+        for j in range(0, self.height):
+            for i in range(0, linewidth):
+                buf[i + j * linewidth] = color
+
+        self.send_command(0x24)
+        self.send_data2(buf)
                 
         # self.send_command(0x26)
         # for j in range(0, self.height):
             # for i in range(0, linewidth):
-                # self.send_data(~image[i + j * linewidth])  
-        self.TurnOnDisplayPart()
-
-    def displayPartBaseImage(self, image):
-        if self.width%8 == 0:
-            linewidth = int(self.width/8)
-        else:
-            linewidth = int(self.width/8) + 1
-
-        self.send_command(0x24)
-        for j in range(0, self.height):
-            for i in range(0, linewidth):
-                self.send_data(image[i + j * linewidth])   
+                # self.send_data(color)   
                 
-                
-        self.send_command(0x26)
-        for j in range(0, self.height):
-            for i in range(0, linewidth):
-                self.send_data(image[i + j * linewidth])  
-        self.TurnOnDisplay()
-    
-    def Clear(self, color):
-        if self.width%8 == 0:
-            linewidth = int(self.width/8)
-        else:
-            linewidth = int(self.width/8) + 1
-        # logging.debug(linewidth)
-        
-        self.send_command(0x24)
-        for j in range(0, self.height):
-            for i in range(0, linewidth):
-                self.send_data(color)   
         self.TurnOnDisplay()
 
     def sleep(self):
@@ -311,8 +311,8 @@ class EPD:
         # self.send_command(0x20)
 
         self.send_command(0x10) #enter deep sleep
-        self.send_data(0x01)
-        epdconfig.delay_ms(100)
+        self.send_data(0x03)
+        epdconfig.delay_ms(2000)
         epdconfig.module_exit()
 
 ### END OF FILE ###

@@ -53,7 +53,7 @@ class EpaperDisplay:
         return True
 
     def close(self):
-        self.__epd.init(self.__epd.FULL_UPDATE)
+        self.__epd.init()
         self.__epd.Clear(0xFF)
         self.__epd.sleep()
         self.__epd = None
@@ -123,7 +123,7 @@ class EpaperDisplay:
                     self.__graphPanel.image, self.__graphPanel.xy)
 
             rotatedImg = self.__hGlucoseModeImage.rotate(180 * (1 if self.__config[Cfg.orientation] in [90,180] else 0))
-            self.__epd.init(self.__epd.FULL_UPDATE)
+            self.__epd.init()
             self.__epd.display(self.__epd.getbuffer(rotatedImg))
             self.__epd.sleep()
 
@@ -133,7 +133,7 @@ class EpaperDisplay:
                 self.__bannerPanel.image, self.__bannerPanel.xy)
 
             rotatedImg = self.__hTextModeImage.rotate(180 * (1 if self.__config[Cfg.orientation]==90 else 0))
-            self.__epd.init(self.__epd.FULL_UPDATE)
+            self.__epd.init()
             self.__epd.display(self.__epd.getbuffer(rotatedImg))
             self.__epd.sleep()
 
@@ -149,7 +149,7 @@ class EpaperDisplay:
         self.__wipeImage(panel.image)
 
     def clear(self):
-        self.__epd.init(self.__epd.FULL_UPDATE)
+        self.__epd.init()
         print("Clear...")
         self.__epd.Clear(0xFF)
         self.__epd.sleep()
