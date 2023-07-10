@@ -27,9 +27,11 @@
 # THE SOFTWARE.
 #
 
+# Downloaded from:
+# https://github.com/waveshare/e-Paper/tree/master/RaspberryPi_JetsonNano/python/lib/waveshare_epd
 
 import logging
-from . import epdconfig
+from .epdconfig import epdconfig
 
 # Display resolution
 EPD_WIDTH       = 122

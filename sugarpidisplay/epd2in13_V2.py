@@ -27,9 +27,12 @@
 # THE SOFTWARE.
 #
 
+# Downloaded from:
+# https://github.com/waveshare/e-Paper/tree/master/RaspberryPi_JetsonNano/python/lib/waveshare_epd
+# added a default value for the init() update parameter
 
 import logging
-from . import epdconfig
+from .epdconfig import epdconfig
 
 # Display resolution
 EPD_WIDTH       = 122
@@ -128,7 +131,7 @@ class EPD:
         self.send_command(0x20)        
         self.ReadBusy()
         
-    def init(self, update):
+    def init(self, update=FULL_UPDATE):
         if (epdconfig.module_init() != 0):
             return -1
         # EPD hardware init start
@@ -313,4 +316,3 @@ class EPD:
         epdconfig.module_exit()
 
 ### END OF FILE ###
-
