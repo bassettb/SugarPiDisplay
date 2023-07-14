@@ -31,6 +31,7 @@ class EpaperDisplay:
         self.__config[Cfg.time_24hour] = config[Cfg.time_24hour]
         self.__config[Cfg.orientation] = config[Cfg.orientation]
         self.__config[Cfg.show_graph] = config[Cfg.show_graph]
+        self.__config[Cfg.unit_mmol] = config[Cfg.unit_mmol]
 
         # TextModeImage is used to display banner text on startup.  Always landscape
         self.__hTextModeImage = Image.new(
@@ -74,6 +75,7 @@ class EpaperDisplay:
 
         if self.__config[Cfg.show_graph]:
             self.__fontBG = ImageFont.truetype(fontPath, 74)
+            self.__fontBG2 = ImageFont.truetype(fontPath, 60)
             bgPanelSize = (122, 70)
             agePanelSize = (70, 52)
             trendPanelSize = (52, 52)
@@ -94,12 +96,14 @@ class EpaperDisplay:
             trendPanelSize = (70, 70)
             if self.__config[Cfg.orientation] in [0,180]:
                 self.__fontBG = ImageFont.truetype(fontPath, 76)
+                self.__fontBG2 = ImageFont.truetype(fontPath, 61)
                 bgPanelSize = (122, 70)
                 self.__bgPanel = Panel((0, 26), bgPanelSize)
                 self.__trendPanel = Panel((26, 125), trendPanelSize)
                 self.__agePanel = Panel((26, 205), agePanelSize)
             else:
                 self.__fontBG = ImageFont.truetype(fontPath, 114)
+                self.__fontBG2 = ImageFont.truetype(fontPath, 91)
                 bgPanelSize = (180, 90)
                 self.__bgPanel = Panel((0, 16), bgPanelSize)
                 self.__trendPanel = Panel((180, 0), trendPanelSize)
@@ -200,16 +204,27 @@ class EpaperDisplay:
 
     def __update_value(self, value, isStale):
         strikeThrough = isStale or value is None
-        valStr = ""
-        if (value is not None):
-            valStr = str(value)
-        valStr = valStr.rjust(3)
-        #print(valStr + "   " + str(mins))
         self.__wipePanel(self.__bgPanel)
         drawBg = ImageDraw.Draw(self.__bgPanel.image)
         textXY = (5, 8)
+        textSize = (0,0)
+        if (value is None or not self.__config[Cfg.unit_mmol]):
+            valStr = ""
+            if (value is not None):
+                valStr = str(value)
+            valStr = valStr.rjust(3)
+            textSize = self.__drawText(drawBg, textXY, valStr, self.__fontBG)
 
-        textSize = self.__drawText(drawBg, textXY, valStr, self.__fontBG)
+        else:
+            valMmol = value/18
+            valStr = "{:.1f}".format(valMmol)
+            valStr = valStr.rjust(4)
+
+            textIntSize = self.__drawText(drawBg, textXY, valStr[0:2], self.__fontBG)
+            gap = textIntSize[0] / 16
+            textDecSize = self.__drawText(drawBg, (textXY[0] + textIntSize[0] + gap, textXY[1]), valStr[3], self.__fontBG2)
+            textSize = (textIntSize[0] + gap + textDecSize[0], textIntSize[1])
+
         if (strikeThrough):
             drawBg.line((textXY[0], textXY[1] + textSize[1]//2,
                          textXY[0] + textSize[0], textXY[1] + textSize[1]//2),
