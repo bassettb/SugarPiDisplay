@@ -75,7 +75,7 @@ class EpaperDisplay:
 
         if self.__config[Cfg.show_graph]:
             self.__fontBG = ImageFont.truetype(fontPath, 74)
-            self.__fontBG2 = ImageFont.truetype(fontPath, 60)
+            self.__fontBG2 = ImageFont.truetype(fontPath, 55)
             bgPanelSize = (122, 70)
             agePanelSize = (70, 52)
             trendPanelSize = (52, 52)
@@ -96,14 +96,14 @@ class EpaperDisplay:
             trendPanelSize = (70, 70)
             if self.__config[Cfg.orientation] in [0,180]:
                 self.__fontBG = ImageFont.truetype(fontPath, 76)
-                self.__fontBG2 = ImageFont.truetype(fontPath, 61)
+                self.__fontBG2 = ImageFont.truetype(fontPath, 57)
                 bgPanelSize = (122, 70)
                 self.__bgPanel = Panel((0, 26), bgPanelSize)
                 self.__trendPanel = Panel((26, 125), trendPanelSize)
                 self.__agePanel = Panel((26, 205), agePanelSize)
             else:
                 self.__fontBG = ImageFont.truetype(fontPath, 114)
-                self.__fontBG2 = ImageFont.truetype(fontPath, 91)
+                self.__fontBG2 = ImageFont.truetype(fontPath, 85)
                 bgPanelSize = (180, 90)
                 self.__bgPanel = Panel((0, 16), bgPanelSize)
                 self.__trendPanel = Panel((180, 0), trendPanelSize)
