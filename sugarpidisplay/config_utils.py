@@ -6,6 +6,7 @@ class Cfg():
     ns_token = 'nightscout_access_token'
     dex_user = 'dexcom_username'
     dex_pass = 'dexcom_password'
+    outside_us = 'outside_us'
     use_animation = 'use_animation'
     time_24hour = 'time_24hour'
     unit_mmol = 'unit_mmolL'
@@ -24,6 +25,8 @@ def fill_config_gaps(config):
         config[Cfg.show_graph] = True
     if Cfg.unit_mmol not in config:
         config[Cfg.unit_mmol] = False
+    if Cfg.outside_us not in config:
+        config[Cfg.outside_us] = False
 
 def read_config(config, configPath, logger):
     config.clear()
