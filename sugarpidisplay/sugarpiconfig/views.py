@@ -57,6 +57,7 @@ class MyForm(FlaskForm):
         'Dexcom UserName', validators=[dexcom_field_check])
     dexcom_pass = PasswordField(
         'Dexcom Password', validators=[dexcom_field_check])
+    outside_us = BooleanField('Outside US')
     ns_url = StringField(
         'Nightscout URL', validators=[nightscout_field_check])
     ns_token = StringField(
@@ -70,7 +71,7 @@ def hello_world():
 
 @app.route('/success')
 def success():
-    return 'Your device is configured.  Now cycle the power and it will use the new settings'
+    return 'Your device is configured.  Now cycle the power to use the new settings'
 
 
 @app.route('/', methods=('GET', 'POST'))
@@ -96,6 +97,7 @@ def handle_submit(form):
     if (form.data_source.data == source_dexcom):
         config[Cfg.dex_user] = form.dexcom_user.data
         config[Cfg.dex_pass] = form.dexcom_pass.data
+        config[Cfg.outside_us] = form.outside_us.data
     else:
         config[Cfg.ns_url] = form.ns_url.data
         config[Cfg.ns_token] = form.ns_token.data
@@ -121,6 +123,8 @@ def loadData(form):
                     form.dexcom_user.data = config[Cfg.dex_user]
                 if (Cfg.dex_pass in config):
                     form.dexcom_pass.data = config[Cfg.dex_pass]
+                if (Cfg.outside_us in config):
+                    form.outside_us.data = config[Cfg.outside_us]
             if (config[Cfg.data_source] == source_nightscout):
                 if (Cfg.ns_url in config):
                     form.ns_url.data = config[Cfg.ns_url]

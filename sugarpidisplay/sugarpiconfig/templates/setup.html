@@ -14,6 +14,9 @@
       <div>{{ form.dexcom_user(size=40) }}</div>
       <div class="block">{{ form.dexcom_pass.label }}</div>
       <div>{{ form.dexcom_pass(size=40) }}</div>
+      <div class="block">
+        {{ form.outside_us.label }} {{ form.outside_us }}
+      </div>
     </div>
     <div class="toggle nightscout">
       <div class="block">{{ form.ns_url.label }}</div>

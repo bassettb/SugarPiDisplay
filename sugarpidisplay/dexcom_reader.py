@@ -7,7 +7,8 @@ from .trend import Trend
 from .utils import Reading, get_reading_age_minutes
 from .config_utils import Cfg
 
-host = "share2.dexcom.com"
+host_us = "share2.dexcom.com"
+host_non_us = "shareous1.dexcom.com"
 login_resource = "/ShareWebServices/Services/General/LoginPublisherAccountByName"
 latestgv_resource = "/ShareWebServices/Services/Publisher/ReadPublisherLatestGlucoseValues"
 user_agent = "Dexcom Share/3.0.2.11 CFNetwork/711.2.23 Darwin/14.0.0"
@@ -27,10 +28,12 @@ class DexcomReader():
     def set_config(self, __config):
         self.__config[Cfg.dex_user] = __config[Cfg.dex_user]
         self.__config[Cfg.dex_pass] = __config[Cfg.dex_pass]
+        self.__config[Cfg.outside_us] = __config[Cfg.outside_us]
         return True
 
     def login(self):
         self.__sessionId = ""
+        host = host_non_us if (self.__config[Cfg.outside_us]) else host_us
         try:
             conn = http.client.HTTPSConnection(host)
             payload = self.__get_payload_for_login()
@@ -84,6 +87,7 @@ class DexcomReader():
 
     def __make_request(self):
         result = {'status': 0, 'content': '', 'error': None}
+        host = host_non_us if (self.__config[Cfg.outside_us]) else host_us
         try:
             conn = http.client.HTTPSConnection(host)
 
